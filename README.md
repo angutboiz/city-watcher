@@ -27,12 +27,9 @@ là một nền tảng kỹ thuật số cho phép người dân gửi báo cáo
 
 ## Chức năng chính
 
-Giới thiệu sơ qua các chức năng chính của ứng dụng. Ứng dụng được chia ra làm 4 chức năng chính, trong đó:
+Các chức năng chính của ứng dụng:
 
 -   Người dân chọn khu vực đang ở và tạo phản hồi trên app
--   Tìm lộ trình đi tới điểm điểm, xem các thông tin chi tiết về địa điểm.
--   Đọc, nghe thông tin về địa điểm, bài viết.
--   Sử dụng Travel Bot để tham khảo, tạo lộ trình, kế hoạch đi du lịch.
 
 ## Tài liệu kỹ thuật
 
