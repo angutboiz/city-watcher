@@ -1,5 +1,7 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+
+// kiểm tra token và lấy thông tin user từ token
 const authMiddleware = async (req, res, next) => {
     const token = req.headers.authorization?.split(" ")[1]; // Tách token từ header
     if (token) {

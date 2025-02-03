@@ -2,6 +2,14 @@ const mongoose = require("mongoose");
 
 const UserSchema = new mongoose.Schema(
     {
+        reward_id: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Reward",
+        },
+        notification_id: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Notification",
+        },
         displayName: {
             type: String,
             required: true,
@@ -14,17 +22,16 @@ const UserSchema = new mongoose.Schema(
             max: 10,
             unique: true,
         },
-        password: {
-            type: String,
-            min: 6,
-        },
+        // khi người dùng đăng ký sẽ được gửi mã xác thực, nếu người dùng không xác thực thì không thể sử dụng app
         verify: {
             type: Boolean,
             default: false,
         },
+        // khu vực nhà ở của người dùng Bình Dương
         zone: {
             type: String,
-            default: "Tan Uyen",
+            default: "Tân Uyên",
+            enum: ["Tân Uyên", "Thuận An", "Dĩ An", "Bến Cát", "Phú Giáo", "Bầu Bàng", "Bắc Tân Uyên", "Dầu Tiếng", "Thủ Dầu Một"],
         },
         roles: {
             type: String,
@@ -46,3 +53,7 @@ const UserSchema = new mongoose.Schema(
 );
 
 module.exports = mongoose.model("User", UserSchema);
+
+// user: người dùng bình thường
+// admin: quản trị viên
+// manager: người quản lý các sự cố đô thị ở khu vực nhất định
