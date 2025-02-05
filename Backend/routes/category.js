@@ -10,7 +10,7 @@ const {
 } = require("../middleware/authorizationMiddleWare");
 const router = express.Router();
 router.post("/create", checkAdminMiddleware, createCategory);
-router.get("/categories", getCategories);
-router.get("/categories/:id", getCategoryById);
-router.delete("/categories/:id", checkAdminMiddleware, deleteCategory);
+router.get("/", getCategories);
+router.get("/:id", getCategoryById);
+router.delete("/:id", checkAdminMiddleware, deleteCategory);
 module.exports = router;
