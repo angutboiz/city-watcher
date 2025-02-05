@@ -1,7 +1,7 @@
 const ErrorResponse = require('../core/error.response')
 const SuccessResponse = require('../core/success.response')
 const catchAsync = require('../middleware/catchAsync')
-const categoryModel = require('../models/Category')
+const categoryModel = require('../models/category.model')
 
 const getCategories = catchAsync(async (req, res) => {
     const category = await categoryModel.find().lean()
