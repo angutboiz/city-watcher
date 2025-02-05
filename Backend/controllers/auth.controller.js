@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const validator = require('validator')
-const User = require('../models/User')
+const User = require('../models/user.model')
 const bcrypt = require('bcrypt')
 const HTML_TEMPLATE = require('../services/html-template')
 const SENDMAIL = require('../services/mail')

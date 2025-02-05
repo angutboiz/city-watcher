@@ -5,7 +5,7 @@ const {
     deleteCategory,
     getCategoryById,
     updateCategory,
-} = require('../controllers/categoryController')
+} = require('../controllers/category.controller')
 const {
     checkAdminMiddleware,
 } = require('../middleware/authorizationMiddleWare')

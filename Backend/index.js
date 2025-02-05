@@ -3,7 +3,7 @@ const cors = require('cors')
 const { requestLogger } = require('./core/logger')
 const errorHandler = require('./middleware/errorHandler')
 
-const connectDB = require('./config/db')
+const connectDB = require('./config/db.config')
 const app = express()
 const dotenv = require('dotenv')
 const morgan = require('morgan')
