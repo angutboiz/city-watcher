@@ -1,0 +1,1 @@
+class ErrorResponse extends Error {}
