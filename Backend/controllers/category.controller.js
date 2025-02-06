@@ -14,7 +14,7 @@ const getCategoryById = catchAsync(async (req, res) => {
         _id: categoryId,
     })
     if (!getById) {
-        return ErrorResponse.notFound(res, 'Category not found!')
+        return ErrorResponse.notFound(res, 'Category không tồn tại!')
     }
     return SuccessResponse.ok(res, 'Lấy category thành công!', getById)
 })

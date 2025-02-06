@@ -46,7 +46,6 @@ const registerUser = catchAsync(async (req, res) => {
         displayName,
         email,
         phoneNumber,
-        roles: 'user',
         password: hashedPassword,
         otp,
         expire_otp: Date.now() + 1000 * 60 * 10, // thời hạn 10 phút
@@ -91,13 +90,13 @@ const loginUser = catchAsync(async (req, res) => {
     if (!user.status) {
         return ErrorResponse.unauthorized(res, 'Tài khoản đã bị khoá')
     }
-
-    if (!user.verify) {
-        return ErrorResponse.unauthorized(
-            res,
-            'Tài khoản chưa được xác thực, vui lòng kiểm tra email của bạn'
-        )
-    }
+    //Nhớ mở lại
+    // if (!user.verify) {
+    //     return ErrorResponse.unauthorized(
+    //         res,
+    //         'Tài khoản chưa được xác thực, vui lòng kiểm tra email của bạn'
+    //     )
+    // }
 
     const isMatch = await bcrypt.compare(password, user.password)
 
