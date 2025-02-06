@@ -5,7 +5,7 @@ const categoryModel = require('../models/category.model')
 
 const getCategories = catchAsync(async (req, res) => {
     const category = await categoryModel.find().lean()
-    SuccessResponse.ok(res, 'Get categories success!', category)
+    SuccessResponse.ok(res, 'Lấy danh sách category thành công!', category)
 })
 
 const getCategoryById = catchAsync(async (req, res) => {
@@ -16,7 +16,7 @@ const getCategoryById = catchAsync(async (req, res) => {
     if (!getById) {
         return ErrorResponse.notFound(res, 'Category not found!')
     }
-    return SuccessResponse.ok(res, 'Get category success!', getById)
+    return SuccessResponse.ok(res, 'Lấy category thành công!', getById)
 })
 
 const createCategory = catchAsync(async (req, res) => {
@@ -33,7 +33,7 @@ const createCategory = catchAsync(async (req, res) => {
     const category = new categoryModel({ name, desc })
     await category.save()
 
-    SuccessResponse.created(res, 'Create category success!', category)
+    SuccessResponse.created(res, 'Tạo category thành công!', category)
 })
 
 const updateCategory = catchAsync(async (req, res) => {

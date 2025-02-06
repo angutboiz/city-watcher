@@ -2,7 +2,7 @@ const express = require('express')
 
 const router = express.Router()
 
-const authRoutes = require('./auth.roter')
+const authRoutes = require('./auth.router')
 // const profileRoutes = require("./profile");
 const ChatRoutes = require('./chat.router')
 const uploadRoutes = require('./upload.router')
