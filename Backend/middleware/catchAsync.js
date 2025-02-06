@@ -7,7 +7,7 @@ const catchAsync = (fn) => {
         fn(req, res, next).catch((err) => {
             logError(err, req)
             // res.status(500).json({ message: 'Internal Server Error' })
-            next(new ErrorResponse(500, 'Internal Server Error', err))
+            next(err)
         })
     }
 }

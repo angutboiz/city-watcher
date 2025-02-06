@@ -1,26 +1,28 @@
-import { View, Text } from "react-native";
-import React from "react";
-import { useGlobalSearchParams, useRouter } from "expo-router";
+import { View, Text } from 'react-native'
+import React from 'react'
+import { useGlobalSearchParams, useRouter } from 'expo-router'
 
 const useTheme = () => {
-    const router = useRouter();
+    const router = useRouter()
 
-    const { colorScheme: globalColorScheme } = useGlobalSearchParams();
+    const { colorScheme: globalColorScheme } = useGlobalSearchParams()
 
-    const [localColorScheme, setLocalColorScheme] = React.useState(globalColorScheme || "dark");
+    const [localColorScheme, setLocalColorScheme] = React.useState(
+        globalColorScheme || 'light'
+    )
 
     React.useEffect(() => {
         if (globalColorScheme) {
-            setLocalColorScheme(globalColorScheme);
+            setLocalColorScheme(globalColorScheme)
         }
-    }, [globalColorScheme]);
+    }, [globalColorScheme])
 
     const toggleTheme = () => {
-        const newColorScheme = localColorScheme === "light" ? "dark" : "light";
-        setLocalColorScheme(newColorScheme);
-        router.setParams({ colorScheme: newColorScheme });
-    };
-    return { toggleTheme, colorScheme: localColorScheme };
-};
+        const newColorScheme = localColorScheme === 'light' ? 'dark' : 'light'
+        setLocalColorScheme(newColorScheme)
+        router.setParams({ colorScheme: newColorScheme })
+    }
+    return { toggleTheme, colorScheme: localColorScheme }
+}
 
-export default useTheme;
+export default useTheme

@@ -54,19 +54,19 @@ const sendForgetPasswordMail = catchAsync(async (user, new_password) => {
     await transporter.sendMail(options)
 })
 
-// const sendOTPMail = catchAsync(async (user, otp) => {
-//     const options = {
-//         to: user.email,
-//         subject: 'Xác thực OTP',
-//         html: HTML_TEMPLATE(
-//             user.displayName,
-//             user.otp,
-//             'Mã OTP',
-//             'Mã OTP chỉ có hiệu lực trong 10 phút'
-//         ),
-//     }
+const sendOTPMail = catchAsync(async (user) => {
+    const options = {
+        to: user.email,
+        subject: 'Xác thực OTP',
+        html: HTML_TEMPLATE(
+            user.displayName,
+            user.otp,
+            'Mã OTP',
+            'Mã OTP chỉ có hiệu lực trong 10 phút'
+        ),
+    }
 
-//     await transporter.sendMail(options)
-// })
+    await transporter.sendMail(options)
+})
 
-module.exports = { sendForgetPasswordMail }
+module.exports = { sendForgetPasswordMail, sendOTPMail }

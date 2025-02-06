@@ -71,6 +71,8 @@ const UserSchema = new mongoose.Schema(
                 'https://vnn-imgs-a1.vgcloud.vn/image1.ictnews.vn/_Files/2020/03/17/trend-avatar-1.jpg',
         },
         refreshToken: String, // Lưu refresh token trong DB
+        otp: Number, // Mã OTP để xác thực
+        expire_otp: Date, // Thời gian hết hạn của mã OTP
     },
     {
         timestamps: true,

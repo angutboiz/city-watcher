@@ -3,7 +3,10 @@ const validator = require('validator')
 const User = require('../models/user.model')
 const bcrypt = require('bcrypt')
 const HTML_TEMPLATE = require('../services/html-template')
-const { sendForgetPasswordMail } = require('../services/nodemailer')
+const {
+    sendForgetPasswordMail,
+    sendOTPMail,
+} = require('../services/nodemailer')
 
 const {
     generateAccessToken,
@@ -25,10 +28,10 @@ const registerUser = catchAsync(async (req, res) => {
     if (!validator.isEmail(email)) {
         return ErrorResponse.badRequest(res, 'Email không hợp lệ')
     }
-    let isEmail = await User.findOne({ email })
+    let isEmail = await User.findOne({ email }).lean()
     if (isEmail) return ErrorResponse.badRequest(res, 'Email đã được sử dụng')
 
-    let isPhone = await User.findOne({ phoneNumber })
+    let isPhone = await User.findOne({ phoneNumber }).lean()
     if (isPhone)
         return ErrorResponse.badRequest(res, 'Số điện thoại đã được sử dụng')
 
@@ -36,6 +39,8 @@ const registerUser = catchAsync(async (req, res) => {
         return res.status(400).json({ message: 'Mật khẩu phải trên 6 kí tự' })
     }
     const hashedPassword = await bcrypt.hash(password, 10)
+    //   tạo ngẫu nhiên mã otp
+    const otp = Math.floor(100000 + Math.random() * 900000)
 
     const newUser = new User({
         displayName,
@@ -43,9 +48,31 @@ const registerUser = catchAsync(async (req, res) => {
         phoneNumber,
         roles: 'user',
         password: hashedPassword,
+        otp,
+        expire_otp: Date.now() + 1000 * 60 * 10, // thời hạn 10 phút
+    })
+
+    // tạo token
+    const accessToken = generateAccessToken(newUser._id)
+    const refreshToken = generateRefreshToken(newUser._id)
+
+    // lưu refresh token vào db
+    newUser.refreshToken = refreshToken
+
+    res.cookie('accessToken', accessToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict',
+    })
+    res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict',
     })
 
     await newUser.save()
+    await sendOTPMail(newUser)
+
     return SuccessResponse.created(res, 'Đăng ký thành công')
 })
 
@@ -64,6 +91,14 @@ const loginUser = catchAsync(async (req, res) => {
     if (!user.status) {
         return ErrorResponse.unauthorized(res, 'Tài khoản đã bị khoá')
     }
+
+    if (!user.verify) {
+        return ErrorResponse.unauthorized(
+            res,
+            'Tài khoản chưa được xác thực, vui lòng kiểm tra email của bạn'
+        )
+    }
+
     const isMatch = await bcrypt.compare(password, user.password)
 
     if (!isMatch || !user) {
