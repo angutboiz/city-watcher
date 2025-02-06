@@ -10,6 +10,7 @@ const morgan = require('morgan')
 const helmet = require('helmet')
 const compression = require('compression')
 const ErrorResponse = require('./core/error.response')
+const cookieParser = require('cookie-parser')
 
 dotenv.config()
 
@@ -17,6 +18,9 @@ connectDB()
 
 app.use(cors())
 app.use(express.json({ limit: '50mb' }))
+
+// Middleware để parse cookie
+app.use(cookieParser())
 
 // dùng để log ra các request đến server
 app.use(morgan('dev'))
