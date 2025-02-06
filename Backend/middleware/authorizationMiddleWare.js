@@ -12,15 +12,25 @@ const authMiddleware = async (req, res, next) => {
         )
 
     try {
-        const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET) // Xác thực token
-        const user = await User.findById(decoded.id)
+        const decoded = jwt.decode(accessToken)
+
+        const currentTime = Math.floor(Date.now() / 1000)
+        if (decoded.exp < currentTime) {
+            return ErrorResponse.unauthorized(res, 'Access Token đã hết hạn')
+        }
+
+        const verified = jwt.verify(
+            accessToken,
+            process.env.ACCESS_TOKEN_SECRET
+        ) // Xác thực token
+        const user = await User.findById(verified.id)
 
         req.user = { id: user._id.toString(), role: user.roles }
 
         next()
     } catch (error) {
         console.log(error)
-        ErrorResponse.unauthorized(res, 'Token không hợp lệ')
+        ErrorResponse.unauthorized(res, 'Access Token không hợp lệ')
     }
 }
 
