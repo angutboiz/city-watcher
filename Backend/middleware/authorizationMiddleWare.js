@@ -1,29 +1,36 @@
 const jwt = require('jsonwebtoken')
 const User = require('../models/user.model')
+const ErrorResponse = require('../core/error.response')
 
 // kiểm tra token và lấy thông tin user từ token
 const authMiddleware = async (req, res, next) => {
-    const token = req.headers.authorization?.split(' ')[1] // Tách token từ header
-    if (token) {
-        try {
-            const decoded = jwt.verify(token, process.env.SECRET_KEY) // Xác thực token
-            if (decoded.user) {
-                const user = await User.findById(decoded.user.id)
+    const { accessToken } = req.cookies
+    if (!accessToken)
+        return ErrorResponse.unauthorized(
+            res,
+            'Không có Access Token, cần đăng nhập lại'
+        )
 
-                req.user = { id: user._id.toString(), role: user.roles }
-            } else if (decoded.id) {
-                const user = await User.findById(decoded.id)
-                req.user = { id: user._id.toString(), role: user.roles }
-            }
-            next()
-        } catch (error) {
-            console.log(error)
-            res.status(401).json({
-                message: 'Không tìm thấy token, vui lòng đăng nhập',
-            })
+    try {
+        const decoded = jwt.decode(accessToken)
+
+        const currentTime = Math.floor(Date.now() / 1000)
+        if (decoded.exp < currentTime) {
+            return ErrorResponse.unauthorized(res, 'Access Token đã hết hạn')
         }
-    } else {
-        res.status(401).json({ message: 'Token không hợp lệ hoặc đã hết hạn' })
+
+        const verified = jwt.verify(
+            accessToken,
+            process.env.ACCESS_TOKEN_SECRET
+        ) // Xác thực token
+        const user = await User.findById(verified.id)
+
+        req.user = { id: user._id.toString(), role: user.roles }
+
+        next()
+    } catch (error) {
+        console.log(error)
+        ErrorResponse.unauthorized(res, 'Access Token không hợp lệ')
     }
 }
 
@@ -31,10 +38,7 @@ const checkAdminMiddleware = (req, res, next) => {
     if (req.user.role === 'admin') {
         next()
     } else {
-        res.status(403).json({
-            message: 'Bạn không có quyền truy cập',
-            ok: false,
-        })
+        ErrorResponse.forbidden(res, 'Bạn không có quyền truy cập')
     }
 }
 

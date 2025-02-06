@@ -3,193 +3,195 @@ const validator = require('validator')
 const User = require('../models/user.model')
 const bcrypt = require('bcrypt')
 const HTML_TEMPLATE = require('../services/html-template')
-const SENDMAIL = require('../services/mail')
+const { sendForgetPasswordMail } = require('../services/nodemailer')
 
-const registerUser = async (req, res) => {
-    try {
-        const { displayName, email, phoneNumber, password } = req.body
-        if (!displayName || !email || !password) {
-            return res.status(400).json({ message: 'Vui lòng điền đẩy đủ' })
-        }
+const {
+    generateAccessToken,
+    generateRefreshToken,
+} = require('../utils/generateToken')
+const SuccessResponse = require('../core/success.response')
+const ErrorResponse = require('../core/error.response')
+const catchAsync = require('../middleware/catchAsync')
 
-        if (!validator.isEmail(email)) {
-            return res.status(400).json({ message: 'Email không hợp lệ' })
-        }
-        let isEmail = await User.findOne({ email })
-        if (isEmail)
-            return res.status(400).json({ message: 'Email đã được sử dụng' })
-
-        if (password.length < 6) {
-            return res
-                .status(400)
-                .json({ message: 'Mật khẩu phải trên 6 kí tự' })
-        }
-        const hashedPassword = await bcrypt.hash(password, 10)
-
-        const newUser = new User({
-            displayName,
-            email,
-            phoneNumber,
-            roles: 'user',
-            password: hashedPassword,
-        })
-
-        await newUser.save()
-        res.status(201).json({ message: 'Đăng ký thành công' })
-    } catch (error) {
-        console.log(error)
-        res.status(500).json({
-            message: 'Server gặp lỗi, vui lòng thử lại sau ít phút',
-        })
+const registerUser = catchAsync(async (req, res) => {
+    const { displayName, email, phoneNumber, password } = req.body
+    if (!displayName || !email || !password) {
+        return ErrorResponse.badRequest(
+            res,
+            'Vui lòng không bỏ trống tên, email, password'
+        )
     }
-}
 
-const loginUser = async (req, res) => {
-    try {
-        const { phoneNumber, password } = req.body
-        console.log(req.body)
-        if (!phoneNumber && !password) {
-            return res.status(400).json({ message: 'Vui lòng điền đẩy đủ' })
-        }
-
-        let user = await User.findOne({ phoneNumber })
-        console.log('phoneNumber::', phoneNumber)
-        console.log(user)
-        if (!user) {
-            return res.status(400).json({ message: 'Người dùng không tồn tại' })
-        }
-
-        if (!user.status) {
-            return res.status(400).json({
-                message:
-                    //   "Tài khoản đã bị khoá, vui lòng liên hệ cho admin qua zalo: 0364080527",
-                    'Tài khoản đã bị khoá, vui lòng bank 10m stk 123',
-            })
-        }
-        const isMatch = await bcrypt.compare(password, user.password)
-
-        if (!isMatch || !user) {
-            return res
-                .status(400)
-                .json({ message: 'Tài khoản hoặc mật khẩu không đúng' })
-        }
-
-        const payload = {
-            user: {
-                phoneNumber: user.phoneNumber,
-                email: user.email,
-                id: user.id,
-                role: user.roles,
-            },
-        }
-
-        const token = jwt.sign(payload, process.env.SECRET_KEY, {
-            expiresIn: '7d',
-        })
-
-        res.cookie('token', token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'development',
-            sameSite: 'strict',
-            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
-        })
-
-        res.status(200).json({ message: 'Đăng nhập thành công', token })
-    } catch (error) {
-        console.log(error)
-        res.status(500).json({
-            message: 'Server gặp lỗi, vui lòng thử lại sau ít phút',
-        })
+    if (!validator.isEmail(email)) {
+        return ErrorResponse.badRequest(res, 'Email không hợp lệ')
     }
-}
+    let isEmail = await User.findOne({ email })
+    if (isEmail) return ErrorResponse.badRequest(res, 'Email đã được sử dụng')
 
-const logoutUser = (req, res) => {
-    res.clearCookie('token', {
+    let isPhone = await User.findOne({ phoneNumber })
+    if (isPhone)
+        return ErrorResponse.badRequest(res, 'Số điện thoại đã được sử dụng')
+
+    if (password.length < 6) {
+        return res.status(400).json({ message: 'Mật khẩu phải trên 6 kí tự' })
+    }
+    const hashedPassword = await bcrypt.hash(password, 10)
+
+    const newUser = new User({
+        displayName,
+        email,
+        phoneNumber,
+        roles: 'user',
+        password: hashedPassword,
+    })
+
+    await newUser.save()
+    return SuccessResponse.created(res, 'Đăng ký thành công')
+})
+
+const loginUser = catchAsync(async (req, res) => {
+    const { phoneNumber, password } = req.body
+    if (!phoneNumber && !password) {
+        return ErrorResponse.badRequest(res, 'Vui lòng điền đẩy đủ')
+    }
+
+    let user = await User.findOne({ phoneNumber })
+
+    if (!user) {
+        return ErrorResponse.notFound(res, 'Người dùng không tồn tại')
+    }
+
+    if (!user.status) {
+        return ErrorResponse.unauthorized(res, 'Tài khoản đã bị khoá')
+    }
+    const isMatch = await bcrypt.compare(password, user.password)
+
+    if (!isMatch || !user) {
+        return ErrorResponse.unauthorized(
+            res,
+            'Tài khoản hoặc mật khẩu không đúng'
+        )
+    }
+
+    // tạo token
+    const accessToken = generateAccessToken(user._id)
+    const refreshToken = generateRefreshToken(user._id)
+
+    // lưu refresh token vào db
+    user.refreshToken = refreshToken
+    await user.save()
+
+    res.cookie('accessToken', accessToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'development',
+        secure: true,
         sameSite: 'strict',
     })
-    res.status(200).json({ ok: true, message: 'Đăng xuất thành công' })
-}
+    res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict',
+    })
 
-const forgetUser = async (req, res) => {
-    try {
-        const { email } = req.body
-        if (!email) {
-            return res.status(400).json({ message: 'Vui lòng điền đẩy đủ' })
-        }
+    SuccessResponse.ok(res, 'Đăng nhập thành công')
+})
 
-        let user = await User.findOne({ email })
-        if (!user) {
-            return res.status(400).json({ message: 'Email không tồn tại' })
-        }
+// Refresh Token để cấp lại Access Token mới
+const refreshToken = catchAsync(async (req, res) => {
+    const { refreshToken } = req.cookies
+    if (!refreshToken)
+        return ErrorResponse.unauthorized(res, 'Không có Refresh Token')
 
-        if (!user.status) {
-            return res.status(400).json({
-                message:
-                    'Tài khoản đã bị khoá, vui lòng liên hệ cho admin qua zalo: 0364080527',
+    const user = await User.findOne({ refreshToken })
+    if (!user)
+        return ErrorResponse.unauthorized(res, 'Refresh Token không hợp lệ')
+
+    jwt.verify(
+        refreshToken,
+        process.env.REFRESH_TOKEN_SECRET,
+        (err, decoded) => {
+            if (err)
+                ErrorResponse.unauthorized(res, 'Refresh Token không hợp lệ')
+
+            const newAccessToken = generateAccessToken(decoded.id)
+            res.cookie('accessToken', newAccessToken, {
+                httpOnly: true,
+                secure: true,
+                sameSite: 'strict',
             })
+            SuccessResponse.ok(res, 'Cấp lại Access Token thành công')
         }
+    )
+})
 
-        const new_password = Math.random().toString(36).slice(-8)
-        const hashedPassword = await bcrypt.hash(new_password, 10)
-        user.password = hashedPassword
-        await user.save()
+// Đăng xuất
+const logoutUser = catchAsync(async (req, res) => {
+    const { refreshToken } = req.cookies
 
-        const options = {
-            to: user.email, // receiver email
-            subject: 'Quên mật khẩu', // Subject line
-            html: HTML_TEMPLATE(
-                user.displayName,
-                new_password,
-                'Mật khẩu tạm thời',
-                'Vui lòng đăng nhập để thay đổi mật khẩu mới'
-            ),
-        }
-
-        SENDMAIL(options, (info) => {
-            console.log('Email sent successfully')
-            console.log('MESSAGE ID: ', info.messageId)
-        })
-
-        res.status(200).json({
-            message: 'Gửi thành công, vui lòng kiểm tra email của bạn',
-        })
-    } catch (error) {
-        console.log(error)
-        res.status(500).json({
-            message: 'Server gặp lỗi, vui lòng thử lại sau ít phút',
-        })
+    const user = await User.findOne({ refreshToken })
+    if (user.refreshToken !== refreshToken) {
+        return ErrorResponse.unauthorized(
+            res,
+            'Refresh Token không hợp lệ, không thể đăng xuất'
+        )
     }
-}
 
-const changePassword = async (req, res) => {
+    user.refreshToken = null
+    await user.save()
+    res.cookie('accessToken', '', { httpOnly: true, expires: new Date(0) })
+    res.cookie('refreshToken', '', { httpOnly: true, expires: new Date(0) })
+    SuccessResponse.ok(res, 'Đăng xuất thành công')
+})
+
+const forgetUser = catchAsync(async (req, res) => {
+    const { email } = req.body
+    if (!email) {
+        return ErrorResponse.badRequest(res, 'Vui lòng điền email của bạn')
+    }
+
+    let user = await User.findOne({ email })
+    if (!user) {
+        return ErrorResponse.badRequest(res, 'Email không tồn tại')
+    }
+
+    if (!user.status) {
+        return ErrorResponse.unauthorized(res, 'Tài khoản đã bị khoá')
+    }
+
+    const new_password = Math.random().toString(36).slice(-8)
+    const hashedPassword = await bcrypt.hash(new_password, 10)
+    user.password = hashedPassword
+    await user.save()
+
+    await sendForgetPasswordMail(user, new_password)
+
+    return SuccessResponse.ok(
+        res,
+        'Gửi thành công, vui lòng kiểm tra email của bạn'
+    )
+})
+
+const changePassword = catchAsync(async (req, res) => {
     const { old_password, new_password, re_new_password } = req.body
-    const { id } = req.user.user
+    const { id } = req.user
     if (!old_password || !new_password || !re_new_password) {
-        return res.status(400).json({ message: 'Vui lòng điền đẩy đủ' })
+        return ErrorResponse.badRequest(res, 'Vui lòng điền đẩy đủ')
     }
 
     if (new_password !== re_new_password) {
-        return res
-            .status(400)
-            .json({ message: 'Mật khẩu mới không trùng khớp' })
+        return ErrorResponse.badRequest(res, 'Mật khẩu mới không trùng khớp')
     }
 
     if (new_password.length < 6) {
-        return res.status(400).json({ message: 'Mật khẩu phải trên 6 kí tự' })
+        return ErrorResponse.badRequest(res, 'Mật khẩu phải trên 6 kí tự')
     }
 
     let user = await User.findById(id)
     if (!user) {
-        return res.status(400).json({ message: 'Email không tồn tại' })
+        return ErrorResponse.notFound(res, 'Tài khoản đã bị khoá')
     }
 
     if (!user.status) {
-        return res.status(400).json({
-            message:
-                'Tài khoản đã bị khoá, vui lòng liên hệ cho admin qua zalo: 0364080527',
-        })
+        return ErrorResponse.forbidden(res, 'Tài khoản đã bị khoá')
     }
 
     const isMatch = await bcrypt.compare(old_password, user.password)
@@ -197,26 +199,28 @@ const changePassword = async (req, res) => {
     //kiểm tra xem mật khẩu mới có trùng với mật khẩu hiện tại hay không
     const isMatchNew = await bcrypt.compare(new_password, user.password)
     if (isMatchNew) {
-        return res
-            .status(400)
-            .json({ message: 'Mật khẩu mới không được trùng với mật khẩu cũ' })
+        return ErrorResponse.unauthorized(
+            res,
+            'Mật khẩu mới không được trùng với mật khẩu cũ'
+        )
     }
 
     if (!isMatch) {
-        return res.status(400).json({ message: 'Mật khẩu cũ không đúng' })
+        return ErrorResponse.unauthorized(res, 'Mật khẩu cũ không đúng')
     }
 
     const hashedPassword = await bcrypt.hash(new_password, 10)
 
     user.password = hashedPassword
     await user.save()
-    return res.status(200).json({ message: 'Cập nhật mật khẩu thành công' })
-}
+    return SuccessResponse.ok(res, 'Cập nhật mật khẩu thành công')
+})
 
 module.exports = {
     registerUser,
     loginUser,
     logoutUser,
+    refreshToken,
     forgetUser,
     changePassword,
 }

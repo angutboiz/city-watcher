@@ -28,6 +28,7 @@ const UserSchema = new mongoose.Schema(
         email: {
             type: String,
             required: true,
+            unique: true,
         },
         password: {
             type: String,
@@ -69,6 +70,7 @@ const UserSchema = new mongoose.Schema(
             default:
                 'https://vnn-imgs-a1.vgcloud.vn/image1.ictnews.vn/_Files/2020/03/17/trend-avatar-1.jpg',
         },
+        refreshToken: String, // Lưu refresh token trong DB
     },
     {
         timestamps: true,
