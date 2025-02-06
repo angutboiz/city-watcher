@@ -7,7 +7,8 @@ const IncidentsSchema = new mongoose.Schema(
             ref: 'User', //người gửi báo cáo
         },
         reciver_id: {
-            type: mongoose.Schema.Types.ObjectId,
+            // type: mongoose.Schema.Types.ObjectId,
+            type: String,
             ref: 'User', //người nhận báo cáo để giải quyết vấn đề (admin hoặc manager)
         },
         location: {
@@ -21,7 +22,7 @@ const IncidentsSchema = new mongoose.Schema(
         },
         comment_id: {
             type: mongoose.Schema.Types.ObjectId,
-            required: true,
+            // required: true,
             ref: 'Comment',
         },
         title: {
@@ -52,4 +53,4 @@ const IncidentsSchema = new mongoose.Schema(
     }
 )
 
-module.exports = mongoose.model('Report', IncidentsSchema)
+module.exports = mongoose.model('Incident', IncidentsSchema)
