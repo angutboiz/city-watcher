@@ -3,10 +3,16 @@
  * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
  */
 
-const tintColorLight = "#0a7ea4";
-const tintColorDark = "#fff";
+const tintColorLight = '#2f95dc';
+const tintColorDark = '#fff';
+
 export const Colors = {
     light: {
+        text: '#000',
+        background: '#fff',
+        tint: tintColorLight,
+        tabIconDefault: '#ccc',
+        tabIconSelected: tintColorLight,
         primary: "rgb(176, 46, 0)",
         onPrimary: "rgb(255, 255, 255)",
         primaryContainer: "rgb(255, 219, 209)",
@@ -23,8 +29,6 @@ export const Colors = {
         onError: "rgb(255, 255, 255)",
         errorContainer: "rgb(255, 218, 214)",
         onErrorContainer: "rgb(65, 0, 2)",
-        background: "rgb(255, 251, 255)",
-        onBackground: "rgb(32, 26, 24)",
         surface: "rgb(255, 251, 255)",
         onSurface: "rgb(32, 26, 24)",
         surfaceVariant: "rgb(245, 222, 216)",
@@ -49,6 +53,11 @@ export const Colors = {
         backdrop: "rgba(59, 45, 41, 0.4)",
     },
     dark: {
+        text: '#fff',
+        background: '#000',
+        tint: tintColorDark,
+        tabIconDefault: '#ccc',
+        tabIconSelected: tintColorDark,
         primary: "rgb(255, 181, 160)",
         onPrimary: "rgb(96, 21, 0)",
         primaryContainer: "rgb(135, 33, 0)",
@@ -65,8 +74,6 @@ export const Colors = {
         onError: "rgb(105, 0, 5)",
         errorContainer: "rgb(147, 0, 10)",
         onErrorContainer: "rgb(255, 180, 171)",
-        background: "rgb(32, 26, 24)",
-        onBackground: "rgb(237, 224, 221)",
         surface: "rgb(32, 26, 24)",
         onSurface: "rgb(237, 224, 221)",
         surfaceVariant: "rgb(83, 67, 63)",
@@ -90,4 +97,4 @@ export const Colors = {
         onSurfaceDisabled: "rgba(237, 224, 221, 0.38)",
         backdrop: "rgba(59, 45, 41, 0.4)",
     },
-};
+} as const;
