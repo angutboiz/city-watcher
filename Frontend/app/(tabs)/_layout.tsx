@@ -9,6 +9,7 @@ import { Colors } from '@/constants/Colors'
 import { useColorScheme } from '@/hooks/useColorScheme'
 import { StatusBar } from 'expo-status-bar'
 import { Icon } from 'react-native-paper'
+import { Ionicons } from '@expo/vector-icons'
 
 export default function TabLayout() {
     const colorScheme = useColorScheme()
@@ -16,42 +17,52 @@ export default function TabLayout() {
     return (
         <Tabs
             screenOptions={{
-                tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+                tabBarActiveTintColor: '#007AFF', // iOS blue color
                 headerShown: false,
                 tabBarButton: HapticTab,
                 tabBarBackground: TabBarBackground,
                 tabBarStyle: Platform.select({
                     ios: {
-                        // Use a transparent background on iOS to show the blur effect
                         position: 'absolute',
+                        borderTopWidth: 1,
+                        borderTopColor: '#E5E5E5',
                     },
                     default: {},
                 }),
+                tabBarItemStyle: {
+                    paddingVertical: 8,
+                },
+                tabBarLabelStyle: {
+                    fontSize: 12,
+                    marginTop: 4,
+                },
             }}
         >
             <Tabs.Screen
                 name="home"
                 options={{
                     title: 'Trang chủ',
-                    tabBarIcon: ({ color }) => (
-                        <Icon size={28} source="home" color={color} />
-                    ),
+                    tabBarIcon: ({ color, focused }) => {
+                        let iconName = focused ? 'home' : 'home-outline';
+                        return <Ionicons name={iconName} size={28} color={color} />;
+                    },
                 }}
             />
             <Tabs.Screen
                 name="chat"
                 options={{
                     title: 'Tin nhắn',
-                    tabBarIcon: ({ color }) => (
-                        <Icon size={28} source="message" color={color} />
-                    ),
+                    tabBarIcon: ({ color, focused }) => {
+                        let iconName = focused ? 'chatbubble' : 'chatbubble-outline';
+                        return <Ionicons name={iconName} size={28} color={color} />;
+                    },
                 }}
             />
             <Tabs.Screen
                 name="incident"
                 options={{
                     title: 'Sự cố',
-                    tabBarIcon: ({ color }) => (
+                    tabBarIcon: ({ color, focused }) => (
                         <Icon size={28} source="plus" color={color} />
                     ),
                 }}
@@ -60,18 +71,20 @@ export default function TabLayout() {
                 name="notification"
                 options={{
                     title: 'Thông báo',
-                    tabBarIcon: ({ color }) => (
-                        <Icon size={28} source="bell" color={color} />
-                    ),
+                    tabBarIcon: ({ color, focused }) => {
+                        let iconName = focused ? 'notifications' : 'notifications-outline';
+                        return <Ionicons name={iconName} size={28} color={color} />;
+                    },
                 }}
             />
             <Tabs.Screen
                 name="setting"
                 options={{
                     title: 'Cài đặt',
-                    tabBarIcon: ({ color }) => (
-                        <Icon size={28} source="shield" color={color} />
-                    ),
+                    tabBarIcon: ({ color, focused }) => {
+                        let iconName = focused ? 'settings' : 'settings-outline';
+                        return <Ionicons name={iconName} size={28} color={color} />;
+                    },
                 }}
             />
             <StatusBar backgroundColor="#161622" style="light" />
