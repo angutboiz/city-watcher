@@ -43,6 +43,13 @@ const IncidentsSchema = new mongoose.Schema(
             enum: ['low', 'medium', 'high'], //low: thấp, medium: trung bình, high: cao
             default: 'low',
         },
+        helpful: {
+            type: Number,
+            default: 0,
+        },
+        image: {
+            type: [String],
+        },
         resolved_content: {
             type: String, // nội dung giải quyết báo cáo
             trim: true,
