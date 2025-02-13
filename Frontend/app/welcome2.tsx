@@ -27,8 +27,8 @@ const Welcome2 = () => {
             <View style={{ flex: 1, padding: 5, flexDirection: 'column', justifyContent: 'space-between' }}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                     <View style={{ flexDirection: 'row' }}>
-                        <Text style={{ fontWeight: 'bold', fontSize: 16 }}>2</Text>
-                        <Text style={{ color: 'gray', fontSize: 16 }}>/3</Text>
+                        <Text style={{ fontWeight: 'bold', fontSize: 16, marginTop: 12, marginLeft:10 }}>2</Text>
+                        <Text style={{ color: 'gray', fontSize: 16, marginTop: 12 }}>/3</Text>
                     </View>
                     <View>
                         <Link
