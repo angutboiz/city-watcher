@@ -10,7 +10,8 @@ import {
 import React, { useState } from 'react'
 import { Link, useNavigation, useRouter } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { Button, Icon, TextInput } from 'react-native-paper'
+import { Button, TextInput } from 'react-native-paper'
+import Icon from 'react-native-vector-icons/Ionicons';
 
 const Welcome1 = () => {
     const [text, setText] = useState('')
@@ -34,45 +35,76 @@ const Welcome1 = () => {
                         </Link>
                     </View>
                 </View>
-                <Image
-                    style={{ width: '130%', height: 300, objectFit: 'cover' }}
-                    source={require('../assets/images/Beep Beep - Road Works.png')}
-                ></Image>
-                <View>
-                    <Text className="text-center text-[#006ffd] font-bold text-3xl">
-                        Báo cáo sự cố chỉ với {'\n'}"một chạm"
-                    </Text>
-                    <View className="mt-3">
-                        <Text className="text-gray-500">
-                            Chụp ảnh hoặc quay video sự cố.
-                        </Text>
-                        <Text className="text-gray-500">
-                            Chọn loại sự cố (ví dụ: đèn đường hỏng, ổ gà, rác
-                            thải...).
-                        </Text>
-                        <Text className="text-gray-500">
-                            Hệ thống tự động xác định vị trí của bạn.
-                        </Text>
-                        <Text className="text-gray-500">
-                            Gửi báo cáo ngay lập tức!
-                        </Text>
+                
+                <View className="flex items-center justify-center bg-white">
+                    <View className="relative w-[300px] h-[200px]">
+                        {/* Top cloud */}
+                        <Image
+                            style={{ 
+                                width: 123, 
+                                height: 56, 
+                                position: 'absolute',
+                                top: 0,
+                                left: 10,
+                            }}
+                            source={require('../assets/images/Vector.png')}
+                        />
+                        
+                        {/* Main illustration */}
+                        <Image
+                            style={{ 
+                                width: 230, 
+                                height: 230, 
+                                position: 'absolute',
+                                top: 30,
+                                left: '50%',
+                                transform: [{ translateX: -100 }]
+                            }}
+                            source={require('../assets/images/test1.png')}
+                        />
+                        
+                        {/* Bottom cloud */}
+                        <Image
+                            style={{ 
+                                width: 100, 
+                                height: 45, 
+                                position: 'absolute',
+                                bottom: -80,
+                                right: 20,
+                            }}
+                            source={require('../assets/images/Vector1.png')}
+                        />
                     </View>
                 </View>
-                <View className="relative h-5 flex flex-row items-center justify-center">
-                    <View className="flex flex-row gap-2 justify-center">
-                        <View className="w-7 h-2 rounded-full bg-[#006ffd]"></View>
-                        <View className="w-2 h-2 rounded-full bg-gray-500"></View>
-                        <View className="w-2 h-2 rounded-full bg-gray-500"></View>
+
+                <View className="bg-[#F5F7FF] rounded-xl p-6">
+                    <Text className="text-center text-[#006ffd] font-bold text-2xl mb-4">
+                        Báo cáo sự cố chỉ với {'\n'}"một chạm"
+                    </Text>
+                    <Text className="text-center text-gray-500 leading-6">
+                        Chỉ với một chạm, bạn hoàn toàn có thể{'\n'}
+                        chụp ảnh hoặc quay video sự cố.{'\n'}
+                        Chọn loại sự cố và hệ thống sẽ tự động{'\n'}
+                        xác định vị trí của bạn.{'\n'}
+                        Hãy gửi báo cáo ngay lập tức!
+                    </Text>
+
+                    <View className="mt-6 flex flex-row items-center justify-center">
+                        <View className="flex flex-row gap-2 justify-center">
+                            <View className="w-6 h-2 rounded-full bg-[#006ffd]"></View>
+                            <View className="w-2 h-2 rounded-full bg-gray-300"></View>
+                            <View className="w-2 h-2 rounded-full bg-gray-300"></View>
+                        </View>
                     </View>
-                    <View className="absolute top-0 right-0">
-                        <TouchableOpacity
-                            onPress={() => router.push('/welcome2')}
-                        >
-                            <Text className="text-[#006ffd] font-bold">
-                                Tiếp tục
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
+
+                    <TouchableOpacity 
+                        onPress={() => router.push('/welcome2')}
+                        className="mt-4 self-center"
+                    >
+                        <View className="w-12 h-12 bg-[#006ffd] rounded-full flex items-center justify-center">
+                        <Icon name="chevron-forward" size={24} color="#ffffff" />
+                        </View>
+                    </TouchableOpacity>
                 </View>
             </View>
         </SafeAreaView>
