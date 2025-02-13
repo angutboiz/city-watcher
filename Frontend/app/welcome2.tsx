@@ -22,26 +22,25 @@ const Welcome2 = () => {
     useEffect(() => {
         navigation.setOptions({ headerShown: false })
     }, [navigation])
-
     return (
-        <SafeAreaView className="h-full w-full">
-            <View className="h-full w-full p-5 flex flex-col justify-between">
-                <View className="flex flex-row justify-between">
-                    <View className="flex flex-row ">
-                        <Text className="font-bold text-lg">2</Text>
-                        <Text className="text-gray-400 text-lg">/3</Text>
+        <SafeAreaView style={{ flex: 1 }}>
+            <View style={{ flex: 1, padding: 5, flexDirection: 'column', justifyContent: 'space-between' }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <View style={{ flexDirection: 'row' }}>
+                        <Text style={{ fontWeight: 'bold', fontSize: 16 }}>2</Text>
+                        <Text style={{ color: 'gray', fontSize: 16 }}>/3</Text>
                     </View>
                     <View>
                         <Link
                             href="/(auth)/login"
-                            className="text-[#006ffd] font-bold text-lg"
+                            style={{ color: '#006ffd', fontWeight: 'bold', fontSize: 16, marginTop: 14 }}
                         >
                             Bỏ qua
                         </Link>
                     </View>
                 </View>
 
-                <View className="w-full h-[300px] overflow-hidden">
+                <View style={{ width: '100%', height: 300, overflow: 'hidden' }}>
                     <Image
                         style={{
                             width: '100%',
@@ -49,51 +48,54 @@ const Welcome2 = () => {
                             objectFit: 'cover',
                         }}
                         source={require('../assets/images/test2.png')}
-                    ></Image>
+                    />
                 </View>
-                <View>
-                    <Text className="text-center text-[#006ffd] font-bold text-3xl">
-                        Theo dõi tiến độ xử lý
-                    </Text>
-                    <View className="mt-3">
-                        <Text className="text-gray-500 text-center">
-                            Nhận thông báo về báo cáo của bạn.
+                <View style={{ backgroundColor: '#d3e6f3', borderRadius: 10, padding: 6, width: '100%', height: '30%' }}>
+                    <View>
+                        <Text style={{ textAlign: 'center', color: '#006ffd', fontWeight: 'bold', fontSize: 24 }}>
+                            Theo dõi tiến độ xử lý
                         </Text>
-                        <Text className="text-gray-500 text-center">
-                            Xem bản đồ trực tiếp vị trí sự cố, tiến độ xử lý và
-                            trao đổi với chính quyền về báo cáo (nếu cần).
-                        </Text>
+                        <View style={{ marginTop: 12 }}>
+                            <Text style={{ color: 'gray', textAlign: 'center' }}>
+                                Nhận thông báo về báo cáo của bạn.
+                            </Text>
+                            <Text style={{ color: 'gray', textAlign: 'center' }}>
+                                Xem bản đồ trực tiếp vị trí sự cố, tiến độ xử lý và
+                                trao đổi với chính quyền về báo cáo (nếu cần).
+                            </Text>
+                        </View>
                     </View>
-                </View>
-                <View className="relative h-5 flex flex-row items-center justify-center">
-                    <View className="flex flex-row gap-2 justify-center">
-                        <View className="w-2 h-2 rounded-full bg-[#006ffd]"></View>
-                        <View className="w-7 h-2 rounded-full bg-[#006ffd]"></View>
-                        <View className="w-2 h-2 rounded-full bg-gray-500"></View>
+                
+                <View style={{ height: 50, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                    <View style={{ flexDirection: 'row', gap: 8, justifyContent: 'center' }}>
+                        <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: '#006ffd' }}></View>
+                        <View style={{ width: 28, height: 8, borderRadius: 4, backgroundColor: '#006ffd' }}></View>
+                        <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: 'gray' }}></View>
                     </View>
-                    <View className="absolute top--10 right-0">
+                    <View style={{ position: 'absolute', top: -40, right: 0 }}>
                         <TouchableOpacity
                             onPress={() => router.push('/welcome3')}
                         >
-<View className="w-12 h-12 bg-[#006ffd] rounded-full flex items-center justify-center">
+                            <View style={{ width: 40, height: 40, backgroundColor: '#006ffd', borderRadius: 24, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 100 }}>
                                 <Icon
                                     name="chevron-forward"
                                     size={24}
-                                    color="#ffffff"
+                                    color="white"
                                 />
                             </View>
                         </TouchableOpacity>
                     </View>
-                    <View className="absolute top--10 left-0">
+                    <View style={{ position: 'absolute', top: -40, left: 0 }}>
                         <TouchableOpacity onPress={() => router.back()}>
-                            <View className="w-12 h-12 bg-[#006ffd] rounded-full flex items-center justify-center">
+                            <View style={{ width: 40, height: 40, backgroundColor: '#006ffd', borderRadius: 24, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 100 }}>
                                 <Icon
                                     name="chevron-back"
                                     size={24}
-                                    color="#ffffff"
+                                    color="white"
                                 />
                             </View>
                         </TouchableOpacity>
+                        </View>
                     </View>
                 </View>
             </View>

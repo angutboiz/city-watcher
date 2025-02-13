@@ -77,7 +77,7 @@ const Welcome1 = () => {
                     </View>
                 </View>
 
-                <View className="bg-[#F5F7FF] rounded-xl p-6">
+                <View className="bg-[#d3e6f3] rounded-xl p-6 w-full">
                     <Text className="text-center text-[#006ffd] font-bold text-2xl mb-4">
                         Báo cáo sự cố chỉ với {'\n'}"một chạm"
                     </Text>

@@ -64,6 +64,7 @@ const Welcome3 = () => {
                         />
                     </View>
                 </View>
+                <View className="bg-[#d3e6f3] rounded-xl p-6 w-full h-72">
                 <View>
                     <Text className="text-center text-[#006ffd] font-bold text-3xl">
                         Cùng chung tay xây dựng đô thị
@@ -82,7 +83,7 @@ const Welcome3 = () => {
                         <View className="w-2 h-2 rounded-full bg-[#006ffd]"></View>
                         <View className="w-7 h-2 rounded-full bg-[#006ffd]"></View>
                     </View>
-                    <View className="absolute top--10 right-0">
+                    <View className="absolute top-9 right-0">
                         <Link
                             href="/(tabs)/home"
                             className="text-[#006ffd] font-bold"
@@ -96,7 +97,7 @@ const Welcome3 = () => {
                             </View>
                         </Link>
                     </View>
-                    <View className="absolute top--10 left-0">
+                    <View className="absolute top-9 left-0">
                         <TouchableOpacity onPress={() => router.back()}>
                         <View className="w-12 h-12 bg-[#006ffd] rounded-full flex items-center justify-center">
                                 <Icon
@@ -106,6 +107,7 @@ const Welcome3 = () => {
                                 />
                             </View>
                         </TouchableOpacity>
+                        </View>
                     </View>
                 </View>
             </View>
