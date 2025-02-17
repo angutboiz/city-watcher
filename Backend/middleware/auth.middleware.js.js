@@ -3,7 +3,7 @@ const User = require('../models/user.model')
 const ErrorResponse = require('../core/error.response')
 
 // kiểm tra token và lấy thông tin user từ token
-const authMiddleware = async (req, res, next) => {
+const verifyToken = async (req, res, next) => {
     const { accessToken } = req.cookies
     if (!accessToken)
         return ErrorResponse.unauthorized(
@@ -34,7 +34,7 @@ const authMiddleware = async (req, res, next) => {
     }
 }
 
-const checkAdminMiddleware = (req, res, next) => {
+const checkAdmin = (req, res, next) => {
     if (req.user.role === 'admin') {
         next()
     } else {
@@ -42,4 +42,4 @@ const checkAdminMiddleware = (req, res, next) => {
     }
 }
 
-module.exports = { authMiddleware, checkAdminMiddleware }
+module.exports = { verifyToken, checkAdmin }

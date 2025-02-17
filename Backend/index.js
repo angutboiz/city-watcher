@@ -11,7 +11,8 @@ const helmet = require('helmet')
 const compression = require('compression')
 const ErrorResponse = require('./core/error.response')
 const cookieParser = require('cookie-parser')
-
+// const swaggerUi = require('swagger-ui-express')
+// const swaggerFile = require('./swagger-output.json')
 dotenv.config()
 
 connectDB()
@@ -35,7 +36,7 @@ app.use(compression())
 app.use(requestLogger)
 
 app.use(require('./routes/index'))
-
+// app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerFile))
 // Middleware bắt route không tồn tại
 app.use((req, res, next) => {
     next(
