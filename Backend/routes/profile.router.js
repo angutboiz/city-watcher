@@ -6,10 +6,7 @@ const {
     updateProfile,
     updateRole,
 } = require('../controllers/profile.controller')
-const {
-    authMiddleware,
-    checkAdminMiddleware,
-} = require('../middleware/authorizationMiddleWare')
+const { checkAdmin, verifyToken } = require('../middleware/auth.middleware.js')
 const router = express.Router()
 
 /**
@@ -31,7 +28,7 @@ const router = express.Router()
  *       200:
  *         description: Danh sách hồ sơ người dùng
  */
-router.get('/admin', authMiddleware, checkAdminMiddleware, getAllProfile)
+router.get('/admin', verifyToken, checkAdmin, getAllProfile)
 
 /**
  * @swagger
@@ -45,7 +42,7 @@ router.get('/admin', authMiddleware, checkAdminMiddleware, getAllProfile)
  *       200:
  *         description: Thông tin hồ sơ cá nhân
  */
-router.get('/', authMiddleware, getProfile)
+router.get('/', verifyToken, getProfile)
 
 /**
  * @swagger
@@ -59,12 +56,7 @@ router.get('/', authMiddleware, getProfile)
  *       200:
  *         description: Danh sách hồ sơ theo khu vực quản lý
  */
-router.get(
-    '/manager',
-    authMiddleware,
-    checkAdminMiddleware,
-    findProfileByManager
-)
+router.get('/manager', verifyToken, checkAdmin, findProfileByManager)
 
 /**
  * @swagger
@@ -98,7 +90,7 @@ router.get(
  *       200:
  *         description: Hồ sơ cá nhân đã được cập nhật
  */
-router.patch('/', authMiddleware, updateProfile)
+router.patch('/', verifyToken, updateProfile)
 
 /**
  * @swagger
@@ -123,6 +115,6 @@ router.patch('/', authMiddleware, updateProfile)
  *       200:
  *         description: Vai trò người dùng đã được cập nhật
  */
-router.patch('/role', authMiddleware, checkAdminMiddleware, updateRole)
+router.patch('/role', verifyToken, checkAdmin, updateRole)
 
 module.exports = router

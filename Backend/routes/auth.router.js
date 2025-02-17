@@ -7,7 +7,7 @@ const {
     logoutUser,
     refreshToken,
 } = require('../controllers/auth.controller')
-const { authMiddleware } = require('../middleware/authorizationMiddleWare')
+const { checkAdmin, verifyToken } = require('../middleware/auth.middleware.js')
 const router = express.Router()
 
 /**
@@ -117,7 +117,7 @@ router.post('/login', loginUser)
  *       500:
  *         description: Lỗi server
  */
-router.post('/forget', authMiddleware, forgetUser)
+router.post('/forget', verifyToken, forgetUser)
 
 /**
  * @swagger
@@ -131,7 +131,7 @@ router.post('/forget', authMiddleware, forgetUser)
  *       500:
  *         description: Lỗi server
  */
-router.post('/logout', authMiddleware, logoutUser)
+router.post('/logout', verifyToken, logoutUser)
 
 /**
  * @swagger
@@ -147,7 +147,7 @@ router.post('/logout', authMiddleware, logoutUser)
  *       500:
  *         description: Lỗi server
  */
-router.post('/refresh-token', authMiddleware, refreshToken)
+router.post('/refresh-token', verifyToken, refreshToken)
 
 /**
  * @swagger
@@ -177,6 +177,6 @@ router.post('/refresh-token', authMiddleware, refreshToken)
  *       500:
  *         description: Lỗi server
  */
-router.post('/change-password', authMiddleware, changePassword)
+router.post('/change-password', verifyToken, changePassword)
 
 module.exports = router

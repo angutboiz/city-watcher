@@ -6,9 +6,7 @@ const {
     getCategoryById,
     updateCategory,
 } = require('../controllers/category.controller')
-const {
-    checkAdminMiddleware,
-} = require('../middleware/authorizationMiddleWare')
+const { checkAdmin, verifyToken } = require('../middleware/auth.middleware.js')
 const router = express.Router()
 
 /**
@@ -76,7 +74,7 @@ router.get('/:id', getCategoryById)
  *       201:
  *         description: Danh mục được tạo thành công
  */
-router.post('/', checkAdminMiddleware, createCategory)
+router.post('/', checkAdmin, createCategory)
 
 /**
  * @swagger
@@ -110,7 +108,7 @@ router.post('/', checkAdminMiddleware, createCategory)
  *       200:
  *         description: Danh mục được cập nhật thành công
  */
-router.patch('/:id', checkAdminMiddleware, updateCategory)
+router.patch('/:id', checkAdmin, updateCategory)
 
 /**
  * @swagger
@@ -131,6 +129,6 @@ router.patch('/:id', checkAdminMiddleware, updateCategory)
  *       200:
  *         description: Danh mục được xóa thành công
  */
-router.delete('/:id', checkAdminMiddleware, deleteCategory)
+router.delete('/:id', checkAdmin, deleteCategory)
 
 module.exports = router

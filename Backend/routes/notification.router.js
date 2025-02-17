@@ -13,7 +13,7 @@ const {
     markAsRead,
     deleteNotification,
 } = require('../controllers/notification.controller')
-const { authMiddleware } = require('../middleware/authorizationMiddleWare')
+const { checkAdmin, verifyToken } = require('../middleware/auth.middleware.js')
 
 const router = express.Router()
 
@@ -116,7 +116,7 @@ router.get('/incident/:id', getIncidentById)
  *               content:
  *                 type: string
  */
-router.post('/notify', authMiddleware, createNotification)
+router.post('/notify', verifyToken, createNotification)
 
 /**
  * @swagger
@@ -136,7 +136,7 @@ router.post('/notify', authMiddleware, createNotification)
  *       200:
  *         description: Thông báo đã được đánh dấu là đã đọc
  */
-router.get('/notify/:notificationId', authMiddleware, markAsRead)
+router.get('/notify/:notificationId', verifyToken, markAsRead)
 
 /**
  * @swagger
@@ -156,6 +156,6 @@ router.get('/notify/:notificationId', authMiddleware, markAsRead)
  *       200:
  *         description: Thông báo đã bị xóa
  */
-router.delete('/notify/:notificationId', authMiddleware, deleteNotification)
+router.delete('/notify/:notificationId', verifyToken, deleteNotification)
 
 module.exports = router
