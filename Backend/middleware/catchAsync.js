@@ -6,7 +6,6 @@ const catchAsync = (fn) => {
     return (req, res, next) => {
         fn(req, res, next).catch((err) => {
             logError(err, req)
-            // res.status(500).json({ message: 'Internal Server Error' })
             next(err)
         })
     }

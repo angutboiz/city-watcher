@@ -22,6 +22,8 @@ import {
 import { Colors } from '../constants/Colors'
 import useTheme from '@/hooks/useTheme'
 import './global.css'
+import { Provider } from 'react-redux'
+import { store } from '@/store/index'
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync()
@@ -54,26 +56,28 @@ export default function RootLayout() {
     }
 
     return (
-        <PaperProvider theme={paperTheme}>
-            <ThemeProvider value={paperTheme}>
-                <Stack>
-                    <Stack.Screen
-                        name="index"
-                        options={{ headerShown: false }}
-                    />
+        <Provider store={store}>
+            <PaperProvider theme={paperTheme}>
+                <ThemeProvider value={paperTheme}>
+                    <Stack>
+                        <Stack.Screen
+                            name="index"
+                            options={{ headerShown: false }}
+                        />
 
-                    <Stack.Screen
-                        name="(tabs)"
-                        options={{ headerShown: false }}
-                    />
-                    <Stack.Screen
-                        name="(auth)"
-                        options={{ headerShown: false }}
-                    />
-                </Stack>
+                        <Stack.Screen
+                            name="(tabs)"
+                            options={{ headerShown: false }}
+                        />
+                        <Stack.Screen
+                            name="(auth)"
+                            options={{ headerShown: false }}
+                        />
+                    </Stack>
 
-                <StatusBar backgroundColor="#021432" style="light" />
-            </ThemeProvider>
-        </PaperProvider>
+                    <StatusBar backgroundColor="#021432" style="light" />
+                </ThemeProvider>
+            </PaperProvider>
+        </Provider>
     )
 }

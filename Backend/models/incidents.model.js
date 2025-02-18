@@ -54,6 +54,10 @@ const IncidentsSchema = new mongoose.Schema(
             type: String, // nội dung giải quyết báo cáo
             trim: true,
         },
+        is_public: {
+            type: Boolean, //báo cáo có công khai không
+            default: true,
+        },
     },
     {
         timestamps: true,

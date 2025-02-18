@@ -117,7 +117,7 @@ router.post('/login', loginUser)
  *       500:
  *         description: Lỗi server
  */
-router.post('/forget', verifyToken, forgetUser)
+router.post('/forget', forgetUser)
 
 /**
  * @swagger

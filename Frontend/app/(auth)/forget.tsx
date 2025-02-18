@@ -1,38 +1,78 @@
-import { StyleSheet, Text, View, TextInput, Pressable } from 'react-native'
-import React, { useState } from 'react'
-import { Link, useRouter } from 'expo-router' // Thêm useRouter
+import {
+    StyleSheet,
+    Text,
+    View,
+    TextInput,
+    Pressable,
+    ToastAndroid,
+} from 'react-native'
+import React, { useEffect, useRef, useState } from 'react'
+import { Link, useLocalSearchParams, useRouter } from 'expo-router' // Thêm useRouter
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { useForm } from 'react-hook-form'
+import axiosAPI from '@/services/axiosInstance'
+import { PaperOtpInput } from 'react-native-paper-otp-input'
 
 const ForgetScreen = () => {
-    const [code, setCode] = useState(['', '', '', '', '', ''])
-    const inputRefs = Array(6)
-        .fill(0)
-        .map(() => React.createRef<TextInput>())
-    
-    const router = useRouter() // Khởi tạo router
+    const [verificationCode, setVerificationCode] = useState([
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+    ])
+    const {
+        control,
+        handleSubmit,
+        formState: { errors },
+        watch,
+    } = useForm({
+        defaultValues: {
+            email: '',
+        },
+    })
+    const [countdown, setCountdown] = useState(0)
+    const [showSuccess, setShowSuccess] = useState(false)
+    const inputRefs = useRef<TextInput[]>([])
+    const { email } = useLocalSearchParams<{ email: string }>()
 
-    const handleCodeChange = (text: string, index: number) => {
-        if (text.length <= 1) {
-            const newCode = [...code]
-            newCode[index] = text
-            setCode(newCode)
+    useEffect(() => {
+        if (countdown > 0) {
+            const timer = setTimeout(() => {
+                setCountdown(countdown - 1)
+            }, 1000)
+            return () => clearTimeout(timer)
+        }
+    }, [countdown])
 
-            if (text.length === 1 && index < 5) {
-                inputRefs[index + 1].current?.focus()
-            }
+    const resendCode = () => {
+        // Only allow resend if countdown is 0
+        if (countdown === 0) {
+            // Handle resend code logic
+            console.log('Resending code...')
+            setShowSuccess(true)
+            setCountdown(60)
+
+            // Hide success message after 3 seconds
+            setTimeout(() => {
+                setShowSuccess(false)
+            }, 3000)
         }
     }
 
-    const handleKeyPress = (e: any, index: number) => {
-        if (e.nativeEvent.key === 'Backspace' && !code[index] && index > 0) {
-            inputRefs[index - 1].current?.focus()
-        }
-    }
+    const [loading, setLoading] = useState(false)
 
-    const handleContinue = () => {
-        if (code.every((digit) => digit)) {
-            router.push('/reset-password') // Chuyển đến trang đặt lại mật khẩu
+    const handleCodeChange = async (pin: string, index: number) => {
+        if (pin.length === 6) {
+            setLoading(true)
+            const { data } = await axiosAPI.post('/auth/forget', {
+                email,
+                code: pin,
+            })
+            console.log(data)
+            setLoading(false)
         }
     }
 
@@ -43,57 +83,54 @@ const ForgetScreen = () => {
             extraScrollHeight={100}
         >
             <SafeAreaView>
-                <View className="px-6 py-10 flex items-center justify-center">
-                    <View>
-                        <Text className="text-2xl font-semibold mb-2 text-center">
-                            Quên mật khẩu
-                        </Text>
-                        <Text className="text-gray-500 mb-8 text-center">
-                            Một mã 6 chữ số đã được gửi đến email
-                            lucasscott13@gmail.com
-                        </Text>
-
-                        {/* Ô nhập mã xác nhận */}
-                        <View className="flex-row justify-between mb-4">
-                            {code.map((digit, index) => (
-                                <TextInput
-                                    key={index}
-                                    ref={inputRefs[index]}
-                                    className={`w-12 h-12 border rounded-lg text-center text-lg
-                                    ${
-                                        digit
-                                            ? 'border-blue-500'
-                                            : 'border-gray-300'
-                                    }`}
-                                    maxLength={1}
-                                    keyboardType="number-pad"
-                                    value={digit}
-                                    onChangeText={(text) =>
-                                        handleCodeChange(text, index)
-                                    }
-                                    onKeyPress={(e) => handleKeyPress(e, index)}
-                                />
-                            ))}
+                <View className="px-6 py-10">
+                    <Text className="text-xl font-semibold mb-3">
+                        Nhập mã xác nhận
+                    </Text>
+                    {email && (
+                        <View>
+                            <Text className="text-gray-500">
+                                Một mã 6 chữ số đã được gửi đến email
+                            </Text>
+                            <Text className="text-gray-500 mb-6">{email}</Text>
                         </View>
-
-                        {/* Gửi lại mã */}
-                        <Pressable className="mb-6">
-                            <Text className="text-blue-500 text-center">
-                                Gửi lại mã
-                            </Text>
-                        </Pressable>
-
-                        {/* Nút tiếp tục */}
-                        <Pressable
-                            className="bg-blue-500 py-4 rounded-lg"
-                            disabled={code.some((digit) => !digit)}
-                            onPress={handleContinue} // Gọi hàm điều hướng
-                        >
-                            <Text className="text-white text-center font-semibold">
-                                Tiếp tục
-                            </Text>
-                        </Pressable>
+                    )}
+                    <View className="mb-3">
+                        <PaperOtpInput
+                            maxLength={6}
+                            otpBorderFocusedColor="#006ffd"
+                            onPinChange={(pin) => handleCodeChange(pin, 0)}
+                        />
                     </View>
+                    ;{/* Success message */}
+                    {showSuccess && (
+                        <Text className="text-green-500 text-center my-3">
+                            Mã đã được gửi thành công
+                        </Text>
+                    )}
+                    {/* Resend code button */}
+                    <Pressable onPress={resendCode} disabled={countdown > 0}>
+                        <Text
+                            className={`text-center mb-6 ${
+                                countdown > 0
+                                    ? 'text-gray-400'
+                                    : 'text-blue-500'
+                            }`}
+                        >
+                            {countdown > 0
+                                ? `Gửi lại mã sau (${countdown}s)`
+                                : 'Gửi lại mã'}
+                        </Text>
+                    </Pressable>
+                    {/* Continue button */}
+                    <Pressable
+                        className="bg-blue-500 rounded-lg py-4 mb-4"
+                        onPress={() => console.log('Continue pressed')}
+                    >
+                        <Text className="text-white text-center font-semibold">
+                            Tiếp tục
+                        </Text>
+                    </Pressable>
                 </View>
             </SafeAreaView>
         </KeyboardAwareScrollView>

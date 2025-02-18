@@ -17,8 +17,8 @@ const ErrorResponse = require('../core/error.response')
 const catchAsync = require('../middleware/catchAsync')
 
 const registerUser = catchAsync(async (req, res) => {
-    const { displayName, email, phoneNumber, password } = req.body
-    if (!displayName || !email || !password) {
+    const { email, password } = req.body
+    if (!email || !password) {
         return ErrorResponse.badRequest(
             res,
             'Vui lòng không bỏ trống tên, email, password'
@@ -31,9 +31,9 @@ const registerUser = catchAsync(async (req, res) => {
     let isEmail = await User.findOne({ email }).lean()
     if (isEmail) return ErrorResponse.badRequest(res, 'Email đã được sử dụng')
 
-    let isPhone = await User.findOne({ phoneNumber }).lean()
-    if (isPhone)
-        return ErrorResponse.badRequest(res, 'Số điện thoại đã được sử dụng')
+    // let isPhone = await User.findOne({ phoneNumber }).lean()
+    // if (isPhone)
+    //     return ErrorResponse.badRequest(res, 'Số điện thoại đã được sử dụng')
 
     if (password.length < 6) {
         return res.status(400).json({ message: 'Mật khẩu phải trên 6 kí tự' })
@@ -43,9 +43,9 @@ const registerUser = catchAsync(async (req, res) => {
     const otp = Math.floor(100000 + Math.random() * 900000)
 
     const newUser = new User({
-        displayName,
+        // displayName,
+        // phoneNumber,
         email,
-        phoneNumber,
         password: hashedPassword,
         otp,
         expire_otp: Date.now() + 1000 * 60 * 10, // thời hạn 10 phút
@@ -72,23 +72,27 @@ const registerUser = catchAsync(async (req, res) => {
     await newUser.save()
     await sendOTPMail(newUser)
 
-    return SuccessResponse.created(res, 'Đăng ký thành công')
+    return SuccessResponse.created(res, 'Đăng ký thành công', {
+        accessToken,
+        refreshToken,
+    })
 })
 
 const loginUser = catchAsync(async (req, res) => {
-    const { phoneNumber, password } = req.body
-    if (!phoneNumber && !password) {
+    const { email, password } = req.body
+    console.log(req.body)
+    if (!email && !password) {
         return ErrorResponse.badRequest(res, 'Vui lòng điền đẩy đủ')
     }
 
-    let user = await User.findOne({ phoneNumber })
+    let user = await User.findOne({ email })
 
     if (!user) {
         return ErrorResponse.notFound(res, 'Người dùng không tồn tại')
     }
 
     if (!user.status) {
-        return ErrorResponse.unauthorized(res, 'Tài khoản đã bị khoá')
+        return ErrorResponse.badRequest(res, 'Tài khoản đã bị khoá')
     }
     //Nhớ mở lại
     // if (!user.verify) {
@@ -101,7 +105,7 @@ const loginUser = catchAsync(async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password)
 
     if (!isMatch || !user) {
-        return ErrorResponse.unauthorized(
+        return ErrorResponse.badRequest(
             res,
             'Tài khoản hoặc mật khẩu không đúng'
         )
@@ -126,7 +130,11 @@ const loginUser = catchAsync(async (req, res) => {
         sameSite: 'strict',
     })
 
-    SuccessResponse.ok(res, 'Đăng nhập thành công')
+    return SuccessResponse.ok(res, 'Đăng nhập thành công', {
+        accessToken,
+        refreshToken,
+        user,
+    })
 })
 
 // Refresh Token để cấp lại Access Token mới
@@ -152,7 +160,11 @@ const refreshToken = catchAsync(async (req, res) => {
                 secure: true,
                 sameSite: 'strict',
             })
-            SuccessResponse.ok(res, 'Cấp lại Access Token thành công')
+            SuccessResponse.ok(
+                res,
+                'Cấp lại Access Token thành công',
+                newAccessToken
+            )
         }
     )
 })

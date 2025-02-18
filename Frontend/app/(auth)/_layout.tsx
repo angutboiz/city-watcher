@@ -2,7 +2,7 @@ import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 import { Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
-
+import Toast from 'react-native-toast-message'
 const AuthLayout = () => {
     return (
         <>
@@ -25,9 +25,16 @@ const AuthLayout = () => {
                         headerShown: false,
                     }}
                 />
+                <Stack.Screen
+                    name="forget-type-email"
+                    options={{
+                        headerShown: false,
+                    }}
+                />
             </Stack>
+            <Toast />
             {/* <Loader isLoading={loading} /> */}
-            <StatusBar backgroundColor="red" style="light" />
+            <StatusBar backgroundColor="#021432" style="light" />
         </>
     )
 }

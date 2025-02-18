@@ -15,7 +15,7 @@ là một nền tảng kỹ thuật số cho phép người dân gửi báo cáo
 
 **Công nghệ**: `React-Native`, `NodeJS`, `Express`, `MongoDB`, `GoogleAPI`, `Cloudinary`, `GPT` , các thư viện khác của React Native, NodeJS.
 
-**Thời gian**: từ tháng 01 - tới tháng 03 năm 2023.
+**Thời gian**: từ tháng 01 - tới tháng 03 năm 2025.
 
 **Người tham gia**:
 
@@ -33,9 +33,9 @@ Các chức năng chính của ứng dụng:
 
 ## Tài liệu kỹ thuật
 
--   Cloudinary Document for NodeJS (2023). Nguồn: [https://cloudinary.com/documentation/node_integration](https://cloudinary.com/documentation/node_integration)
--   Expo Document (2023). Nguồn: [https://docs.expo.dev](https://docs.expo.dev)
--   Google API Document (2023). Nguồn: [https://developers.google.com/workspace/products](https://developers.google.com/workspace/products)
--   React Document (2023). Nguồn: [https://react.dev](https://react.dev/)
--   React-Native Document (2023). Nguồn: [https://reactnative.dev](https://reactnative.dev)
--   React-Navigation Document (2023). Nguồn: [https://reactnavigation.org](https://reactnavigation.org)
+-   Cloudinary Document for NodeJS (2025). Nguồn: [https://cloudinary.com/documentation/node_integration](https://cloudinary.com/documentation/node_integration)
+-   Expo Document (2025). Nguồn: [https://docs.expo.dev](https://docs.expo.dev)
+-   Google API Document (2025). Nguồn: [https://developers.google.com/workspace/products](https://developers.google.com/workspace/products)
+-   React Document (2025). Nguồn: [https://react.dev](https://react.dev/)
+-   React-Native Document (2025). Nguồn: [https://reactnative.dev](https://reactnative.dev)
+-   React-Navigation Document (2025). Nguồn: [https://reactnavigation.org](https://reactnavigation.org)

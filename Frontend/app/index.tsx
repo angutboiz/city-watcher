@@ -7,16 +7,33 @@ import {
     Dimensions,
     TouchableOpacity,
 } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link, useNavigation, useRouter } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Button, TextInput } from 'react-native-paper'
-import Icon from 'react-native-vector-icons/Ionicons';
+import Icon from 'react-native-vector-icons/Ionicons'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 const Welcome1 = () => {
     const [text, setText] = useState('')
     const [show, setShow] = useState(false)
     const router = useRouter()
+
+    const saveSkipWelcome = async () => {
+        await AsyncStorage.setItem('skipWelcome', 'true')
+        router.push('/(auth)/login')
+    }
+
+    const checkSkipWelcome = async () => {
+        const checkSkipWelcome = await AsyncStorage.getItem('skipWelcome')
+        if (checkSkipWelcome) {
+            router.push('/(auth)/login')
+        }
+    }
+
+    useEffect(() => {
+        checkSkipWelcome()
+    }, [])
 
     return (
         <SafeAreaView className="h-full w-full">
@@ -27,47 +44,47 @@ const Welcome1 = () => {
                         <Text className="text-gray-400 text-lg">/3</Text>
                     </View>
                     <View>
-                        <Link
-                            href="/(auth)/login"
+                        <Text
+                            onPress={saveSkipWelcome}
                             className="text-[#006ffd] font-bold text-lg"
                         >
                             Bỏ qua
-                        </Link>
+                        </Text>
                     </View>
                 </View>
-                
+
                 <View className="flex items-center justify-center bg-white">
                     <View className="relative w-[300px] h-[200px]">
                         {/* Top cloud */}
                         <Image
-                            style={{ 
-                                width: 123, 
-                                height: 56, 
+                            style={{
+                                width: 123,
+                                height: 56,
                                 position: 'absolute',
                                 top: 0,
                                 left: 10,
                             }}
                             source={require('../assets/images/Vector.png')}
                         />
-                        
+
                         {/* Main illustration */}
                         <Image
-                            style={{ 
-                                width: 230, 
-                                height: 230, 
+                            style={{
+                                width: 230,
+                                height: 230,
                                 position: 'absolute',
                                 top: 30,
                                 left: '50%',
-                                transform: [{ translateX: -100 }]
+                                transform: [{ translateX: -100 }],
                             }}
                             source={require('../assets/images/test1.png')}
                         />
-                        
+
                         {/* Bottom cloud */}
                         <Image
-                            style={{ 
-                                width: 100, 
-                                height: 45, 
+                            style={{
+                                width: 100,
+                                height: 45,
                                 position: 'absolute',
                                 bottom: -80,
                                 right: 20,
@@ -97,12 +114,16 @@ const Welcome1 = () => {
                         </View>
                     </View>
 
-                    <TouchableOpacity 
+                    <TouchableOpacity
                         onPress={() => router.push('/welcome2')}
                         className="mt-4 self-center"
                     >
                         <View className="w-12 h-12 bg-[#006ffd] rounded-full flex items-center justify-center">
-                        <Icon name="chevron-forward" size={24} color="#ffffff" />
+                            <Icon
+                                name="chevron-forward"
+                                size={24}
+                                color="#ffffff"
+                            />
                         </View>
                     </TouchableOpacity>
                 </View>
