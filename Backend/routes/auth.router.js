@@ -30,19 +30,10 @@ const router = express.Router()
  *           schema:
  *             type: object
  *             required:
- *               - displayName
- *               - phoneNumber
  *               - email
  *               - password
  *               - zone
  *             properties:
- *               displayName:
- *                 type: string
- *                 minLength: 3
- *                 maxLength: 50
- *               phoneNumber:
- *                 type: string
- *                 unique: true
  *               email:
  *                 type: string
  *                 format: email
@@ -75,10 +66,10 @@ router.post('/register', registerUser)
  *           schema:
  *             type: object
  *             required:
- *               - phoneNumber
+ *               - email
  *               - password
  *             properties:
- *               phoneNumber:
+ *               email:
  *                 type: string
  *               password:
  *                 type: string

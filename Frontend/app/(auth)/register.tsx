@@ -9,14 +9,31 @@ import {
     Checkbox,
     Icon,
     MD2Colors,
+    PaperProvider,
     Text,
     TextInput,
 } from 'react-native-paper'
 import { Controller } from 'react-hook-form'
 import { Link } from 'expo-router'
 import axiosAPI from '@/services/axiosInstance'
+import { Dropdown } from 'react-native-element-dropdown'
+
+const OPTIONS = [
+    { label: 'Tân Uyên', value: 'Tân Uyên' },
+    { label: 'Thuận An', value: 'Thuận An' },
+    { label: 'Dĩ An', value: 'Dĩ An' },
+    { label: 'Bến Cát', value: 'Bến Cát' },
+    { label: 'Phú Giáo', value: 'Phú Giáo' },
+    { label: 'Bầu Bàng', value: 'Bầu Bàng' },
+    { label: 'Bắc Tân Uyên', value: 'Bắc Tân Uyên' },
+    { label: 'Dầu Tiếng', value: 'Dầu Tiếng' },
+    { label: 'Thủ Dầu Một', value: 'Thủ Dầu Một' },
+]
 
 const RegisterScreen = () => {
+    const [value, setValue] = useState(null)
+    const [isFocus, setIsFocus] = useState(false)
+
     const {
         control,
         handleSubmit,
@@ -24,9 +41,8 @@ const RegisterScreen = () => {
         formState: { errors },
     } = useForm({
         defaultValues: {
-            // displayName: '',
-            // phoneNumber: '',
             email: '',
+            zone: 'Tân Uyên',
             password: '',
             confirmPassword: '',
             checked: false,
@@ -79,33 +95,6 @@ const RegisterScreen = () => {
                     </Text>
 
                     <View className="flex gap-3">
-                        {/* <Controller
-                            control={control}
-                            name="displayName"
-                            rules={{
-                                required: 'Tên hiển thị là bắt buộc',
-                                minLength: {
-                                    value: 3,
-                                    message: 'Tên hiển thị tối thiểu 3 ký tự',
-                                },
-                            }}
-                            render={({ field: { onChange, value } }) => (
-                                <TextInput
-                                    label="Tên hiển thị"
-                                    mode="outlined"
-                                    value={value}
-                                    onChangeText={onChange}
-                                    error={!!errors.displayName}
-                                    activeOutlineColor="#006ffd"
-                                />
-                            )}
-                        />
-                        {errors.displayName && (
-                            <Text style={{ color: '#ff0000' }}>
-                                {errors.displayName.message}
-                            </Text>
-                        )} */}
-
                         <Controller
                             control={control}
                             name="email"
@@ -243,6 +232,40 @@ const RegisterScreen = () => {
 
                         <Controller
                             control={control}
+                            name="zone"
+                            rules={{
+                                required:
+                                    'Chọn vị trí là bắt buộc\n Vị trí này sẽ gửi đến quản lí khu vực mà bạn chọn',
+                            }}
+                            render={({ field: { onChange, value } }) => (
+                                <Dropdown
+                                    style={styles.dropdown}
+                                    placeholderStyle={styles.placeholderStyle}
+                                    selectedTextStyle={styles.selectedTextStyle}
+                                    inputSearchStyle={styles.inputSearchStyle}
+                                    iconStyle={styles.iconStyle}
+                                    data={OPTIONS}
+                                    search
+                                    maxHeight={300}
+                                    labelField="label"
+                                    valueField="value"
+                                    placeholder="Chọn huyện"
+                                    searchPlaceholder="Tìm tên huyện tỉnh Bình Dương..."
+                                    value={value}
+                                    onChange={(item) => {
+                                        setValue(item.value)
+                                    }}
+                                />
+                            )}
+                        />
+                        {errors.zone && (
+                            <Text style={{ color: '#ff0000' }}>
+                                {errors.zone.message}
+                            </Text>
+                        )}
+
+                        <Controller
+                            control={control}
                             name="checked"
                             rules={{
                                 required:
@@ -309,7 +332,11 @@ const RegisterScreen = () => {
                         </Link>
                     </View>
                     <View className="w-full mt-10">
-                        <Text className="text-center mb-3 w-full ">Hoặc</Text>
+                        <View className="text-center">
+                            <Text className="text-center mb-3 w-full">
+                                Hoặc
+                            </Text>
+                        </View>
                         <View className="border border-gray-500 h-[45px] flex items-center justify-center flex-row gap-2 rounded-lg">
                             <Icon source="google" size={20} color="#62748e" />
                             <Text style={{ color: '#62748e' }}>
@@ -324,3 +351,24 @@ const RegisterScreen = () => {
 }
 
 export default RegisterScreen
+const styles = StyleSheet.create({
+    dropdown: {
+        margin: 0,
+        padding: 15,
+        height: 50,
+        borderColor: 'gray',
+        borderWidth: 0.5,
+    },
+
+    placeholderStyle: {
+        fontSize: 16,
+    },
+    selectedTextStyle: {
+        fontSize: 16,
+    },
+
+    inputSearchStyle: {
+        height: 40,
+        fontSize: 16,
+    },
+})

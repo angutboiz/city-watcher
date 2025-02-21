@@ -21,14 +21,7 @@ export default function TabLayout() {
                 headerShown: false,
                 tabBarButton: HapticTab,
                 tabBarBackground: TabBarBackground,
-                tabBarStyle: Platform.select({
-                    ios: {
-                        position: 'absolute',
-                        borderTopWidth: 1,
-                        borderTopColor: '#E5E5E5',
-                    },
-                    default: {},
-                }),
+
                 tabBarItemStyle: {
                     paddingVertical: 8,
                 },
@@ -43,8 +36,10 @@ export default function TabLayout() {
                 options={{
                     title: 'Trang chủ',
                     tabBarIcon: ({ color, focused }) => {
-                        let iconName = focused ? 'home' : 'home-outline';
-                        return <Ionicons name={iconName} size={28} color={color} />;
+                        let iconName = focused ? 'home' : 'home-outline'
+                        return (
+                            <Ionicons name={iconName} size={28} color={color} />
+                        )
                     },
                 }}
             />
@@ -53,8 +48,12 @@ export default function TabLayout() {
                 options={{
                     title: 'Tin nhắn',
                     tabBarIcon: ({ color, focused }) => {
-                        let iconName = focused ? 'chatbubble' : 'chatbubble-outline';
-                        return <Ionicons name={iconName} size={28} color={color} />;
+                        let iconName = focused
+                            ? 'chatbubble'
+                            : 'chatbubble-outline'
+                        return (
+                            <Ionicons name={iconName} size={28} color={color} />
+                        )
                     },
                 }}
             />
@@ -72,8 +71,12 @@ export default function TabLayout() {
                 options={{
                     title: 'Thông báo',
                     tabBarIcon: ({ color, focused }) => {
-                        let iconName = focused ? 'notifications' : 'notifications-outline';
-                        return <Ionicons name={iconName} size={28} color={color} />;
+                        let iconName = focused
+                            ? 'notifications'
+                            : 'notifications-outline'
+                        return (
+                            <Ionicons name={iconName} size={28} color={color} />
+                        )
                     },
                 }}
             />
@@ -82,8 +85,10 @@ export default function TabLayout() {
                 options={{
                     title: 'Cài đặt',
                     tabBarIcon: ({ color, focused }) => {
-                        let iconName = focused ? 'settings' : 'settings-outline';
-                        return <Ionicons name={iconName} size={28} color={color} />;
+                        let iconName = focused ? 'settings' : 'settings-outline'
+                        return (
+                            <Ionicons name={iconName} size={28} color={color} />
+                        )
                     },
                 }}
             />

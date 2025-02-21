@@ -40,7 +40,7 @@ const CombinedDarkTheme = merge(DarkTheme, customDarkTheme)
 export default function RootLayout() {
     const { colorScheme } = useTheme()
     const [loaded] = useFonts({
-        'Poppins-Medium': require('../assets/fonts/Poppins-Medium.ttf'),
+        'Poppins-Medium': require('./assets/fonts/Poppins-Medium.ttf'),
     })
     const paperTheme =
         colorScheme === 'dark' ? customDarkTheme : customLightTheme

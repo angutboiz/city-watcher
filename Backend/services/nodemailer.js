@@ -44,7 +44,7 @@ const sendForgetPasswordMail = catchAsync(async (user, new_password) => {
         to: user.email,
         subject: 'Quên mật khẩu',
         html: HTML_TEMPLATE(
-            user.displayName,
+            user.displayName || 'Người ẩn danh',
             new_password,
             'Mật khẩu tạm thời',
             'Vui lòng đăng nhập để thay đổi mật khẩu mới'
@@ -59,7 +59,7 @@ const sendOTPMail = catchAsync(async (user) => {
         to: user.email,
         subject: 'Xác thực OTP',
         html: HTML_TEMPLATE(
-            user.displayName,
+            user.displayName || 'Người ẩn danh',
             user.otp,
             'Mã OTP',
             'Mã OTP chỉ có hiệu lực trong 10 phút'

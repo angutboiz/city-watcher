@@ -6,13 +6,20 @@ import {
     Image,
     Pressable,
     Modal,
+    ToastAndroid,
+    TouchableOpacity,
 } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import axiosAPI from '@/services/axiosInstance'
 import { IUser } from '@/types/type'
 import { useRouter } from 'expo-router'
 import { useAuth } from '@/hooks/useAuth'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import { setUser } from '@/store/features/userSlice'
+import { useDispatch } from 'react-redux'
+import ActionSheet, { useSheetRef } from 'react-native-actions-sheet'
+import { Button } from 'react-native-paper'
 
 const SettingItem = ({
     title,
@@ -29,12 +36,13 @@ const SettingItem = ({
     </Pressable>
 )
 
-export default function SettingScreen() {
+const SettingScreen = () => {
     const [showLogoutModal, setShowLogoutModal] = useState(false)
     const [profile, setProfile] = useState<IUser>({} as IUser)
     const router = useRouter()
     const { user, isAuthenticated } = useAuth()
-    console.log(user)
+    const dispatch = useDispatch()
+    const ref = useSheetRef<'snap-me'>()
     // const fetchProfile = async () => {
     //     const { data } = await axiosAPI.get('/profile')
     //     if (data.ok) {
@@ -44,22 +52,61 @@ export default function SettingScreen() {
     useEffect(() => {
         // fetchProfile()
     }, [])
-
-    const handleChange = (name_ui: string) => {
+    const handleChange = async (name_ui: string) => {
         if (name_ui === 'gui') return router.push('/setting/gui')
         if (name_ui === 'privacy') return router.push('/setting/privacy')
         if (name_ui === 'language') return router.push('/setting/language')
+        if (name_ui === 'change-password') {
+            try {
+                const response = await axiosAPI.post('/auth/forget', {
+                    email: user?.email,
+                })
+
+                if (response.data.ok) {
+                    ToastAndroid.show(response.data.message, ToastAndroid.SHORT)
+                    return router.push({
+                        pathname: '/(auth)/change-password',
+                        params: { email: user?.email },
+                    })
+                }
+            } catch (error) {
+                ToastAndroid.show('Đăng nhập thất bại', ToastAndroid.SHORT)
+            }
+        }
     }
 
     const handleLogout = async () => {
-        const { data } = await axiosAPI.post('/auth/logout')
-        if (data.ok) {
+        try {
+            // Lấy refresh token
+            const refreshToken = await AsyncStorage.getItem('refreshToken')
+
+            // Xóa tokens và user state trước
+            await AsyncStorage.multiRemove(['accessToken', 'refreshToken'])
+            dispatch(setUser({} as IUser))
+
+            // Gọi API logout sau
+            if (refreshToken) {
+                await axiosAPI
+                    .post('/auth/logout', { refreshToken })
+                    .catch((err) => {
+                        console.log('Logout API error:', err)
+                        // Vẫn tiếp tục ngay cả khi API lỗi
+                    })
+            }
+
+            // Đóng modal và chuyển hướng
             setShowLogoutModal(false)
-            // await AsyncStorage.removeItem('accessToken')
-            // await AsyncStorage.removeItem('refreshToken')
-            // dispatch(setUser({} as IUser))
-            // router.push('/(auth)/login')
+            router.replace('/(auth)/login')
+        } catch (error) {
+            console.log('Logout error:', error)
+            // Đảm bảo user vẫn được đưa về trang login ngay cả khi có lỗi
+            setShowLogoutModal(false)
+            router.replace('/(auth)/login')
         }
+    }
+
+    const handleOpenEditProfile = () => {
+        ref.current?.show()
     }
 
     return (
@@ -68,7 +115,10 @@ export default function SettingScreen() {
 
             {/* Profile Section */}
             <View style={styles.profileSection}>
-                <View style={styles.avatarContainer}>
+                <TouchableOpacity
+                    style={styles.avatarContainer}
+                    onPress={handleOpenEditProfile}
+                >
                     <Image
                         source={{ uri: user?.profilePicture }}
                         style={styles.avatar}
@@ -76,8 +126,10 @@ export default function SettingScreen() {
                     <View style={styles.editIconContainer}>
                         <Ionicons name="pencil" size={12} color="#fff" />
                     </View>
-                </View>
-                <Text style={styles.name}>{user?.displayName}</Text>
+                </TouchableOpacity>
+                <Text style={styles.name}>
+                    {user?.displayName || 'Chưa có tên'}
+                </Text>
                 <Text style={styles.username}>{user?.email}</Text>
             </View>
 
@@ -90,6 +142,10 @@ export default function SettingScreen() {
                 <SettingItem
                     title="Ngôn ngữ"
                     onPress={() => handleChange('language')}
+                />
+                <SettingItem
+                    title="Thay đổi mật khẩu"
+                    onPress={() => handleChange('change-password')}
                 />
                 <SettingItem
                     title="Quyền riêng tư và bảo mật"
@@ -141,9 +197,53 @@ export default function SettingScreen() {
                     </View>
                 </View>
             </Modal>
+            <ActionSheet gestureEnabled snapPoints={[70, 100]}>
+                <View
+                    style={{
+                        paddingHorizontal: 12,
+                        height: 400,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 10,
+                    }}
+                >
+                    <Text
+                        style={{
+                            color: 'black',
+                            fontSize: 30,
+                        }}
+                    >
+                        Swipe me up!
+                    </Text>
+
+                    <Text
+                        style={{
+                            color: 'black',
+                        }}
+                    >
+                        OR
+                    </Text>
+
+                    <Button
+                        onPress={() => {
+                            if (!ref.current) return
+                            ref.current.snapToIndex(
+                                ref.current?.currentSnapIndex() === 0 ? 1 : 0
+                            )
+                        }}
+                        style={{
+                            width: 250,
+                        }}
+                    >
+                        Snap with a tap!
+                    </Button>
+                </View>
+            </ActionSheet>
         </SafeAreaView>
     )
 }
+
+export default SettingScreen
 
 const styles = StyleSheet.create({
     container: {

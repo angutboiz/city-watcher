@@ -89,14 +89,14 @@ const LoginScreen = () => {
     }, [])
 
     const handleForgetPassword = (email: string) => {
-        if (email) {
-            router.push({
-                pathname: '/(auth)/forget',
-                params: { email: email },
-            })
-        } else {
-            router.push('/(auth)/forget-type-email')
-        }
+        // if (email) {
+        //     router.push({
+        //         pathname: '/(auth)/forget',
+        //         params: { email: email },
+        //     })
+        // } else {
+        // }
+        router.push('/(auth)/forget-type-email')
     }
 
     return (
@@ -118,8 +118,8 @@ const LoginScreen = () => {
                 )}
                 <Image
                     style={styles.logo}
-                    className=""
-                    source={require('../../assets/images/smart-city.jpg')}
+                    className="rounded-b-3xl"
+                    source={require('@/app/assets/images/smart-city.jpg')}
                 ></Image>
                 <View className="px-6 py-10 flex-1">
                     <Text className="text-2xl font-bold text-[#006ffd]">
@@ -195,7 +195,7 @@ const LoginScreen = () => {
                             onPress={() => handleForgetPassword(watch('email'))}
                             mode="text"
                             style={{
-                                marginRight: 'auto',
+                                marginLeft: 'auto',
                                 padding: 0,
                             }}
                         >

@@ -72,15 +72,22 @@ const ForgetScreen = () => {
             }, 3000)
         }
     }
-
+    const router = useRouter()
     const [loading, setLoading] = useState(false)
     const onSubmit = async (data: any) => {
+        console.log(data)
         try {
             setLoading(true)
-            const response = await axiosAPI.post('/auth/login', data)
+            const response = await axiosAPI.post('/auth/forget', {
+                email: data.email,
+            })
 
             if (response.data.ok) {
                 ToastAndroid.show(response.data.message, ToastAndroid.SHORT)
+                router.push({
+                    pathname: '/(auth)/send-forget-password-success',
+                    params: { email: data.email },
+                })
             }
         } catch (error) {
             ToastAndroid.show('Đăng nhập thất bại', ToastAndroid.SHORT)
@@ -138,69 +145,6 @@ const ForgetScreen = () => {
                             Gửi mail
                         </Button>
                     </View>
-                    <Text className="text-xl font-semibold mb-3">
-                        Nhập mã xác nhận
-                    </Text>
-                    {email && (
-                        <View>
-                            <Text className="text-gray-500">
-                                Một mã 6 chữ số đã được gửi đến email
-                            </Text>
-                            <Text className="text-gray-500 mb-6">{email}</Text>
-                        </View>
-                    )}
-
-                    {/* Verification code input boxes */}
-                    <View className="flex-row justify-between mb-6">
-                        {verificationCode.map((digit, index) => (
-                            <TextInput
-                                key={index}
-                                ref={(ref) =>
-                                    (inputRefs.current[index] =
-                                        ref as TextInput)
-                                }
-                                className="w-12 h-12 border border-gray-300 rounded-lg text-center text-lg"
-                                keyboardType="number-pad"
-                                maxLength={1}
-                                value={digit}
-                                onChangeText={(text) =>
-                                    handleCodeChange(text, index)
-                                }
-                            />
-                        ))}
-                    </View>
-
-                    {/* Success message */}
-                    {showSuccess && (
-                        <Text className="text-green-500 text-center mb-2">
-                            Mã đã được gửi thành công
-                        </Text>
-                    )}
-
-                    {/* Resend code button */}
-                    <Pressable onPress={resendCode} disabled={countdown > 0}>
-                        <Text
-                            className={`text-center mb-6 ${
-                                countdown > 0
-                                    ? 'text-gray-400'
-                                    : 'text-blue-500'
-                            }`}
-                        >
-                            {countdown > 0
-                                ? `Gửi lại mã (${countdown}s)`
-                                : 'Gửi mã'}
-                        </Text>
-                    </Pressable>
-
-                    {/* Continue button */}
-                    <Pressable
-                        className="bg-blue-500 rounded-lg py-4 mb-4"
-                        onPress={() => console.log('Continue pressed')}
-                    >
-                        <Text className="text-white text-center font-semibold">
-                            Tiếp tục
-                        </Text>
-                    </Pressable>
                 </View>
             </SafeAreaView>
         </KeyboardAwareScrollView>

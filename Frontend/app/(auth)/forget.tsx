@@ -37,7 +37,6 @@ const ForgetScreen = () => {
     const [showSuccess, setShowSuccess] = useState(false)
     const inputRefs = useRef<TextInput[]>([])
     const { email } = useLocalSearchParams<{ email: string }>()
-
     useEffect(() => {
         if (countdown > 0) {
             const timer = setTimeout(() => {
@@ -71,7 +70,6 @@ const ForgetScreen = () => {
                 email,
                 code: pin,
             })
-            console.log(data)
             setLoading(false)
         }
     }
@@ -88,14 +86,16 @@ const ForgetScreen = () => {
                         Nhập mã xác nhận
                     </Text>
                     {email && (
-                        <View>
+                        <View className="mb-5">
                             <Text className="text-gray-500">
-                                Một mã 6 chữ số đã được gửi đến email
+                                Một mã 6 chữ số đã được gửi đến:
                             </Text>
-                            <Text className="text-gray-500 mb-6">{email}</Text>
+                            <Text className="text-blue-500 font-bold mb-6">
+                                {email}
+                            </Text>
                         </View>
                     )}
-                    <View className="mb-3">
+                    <View className="mb-5">
                         <PaperOtpInput
                             maxLength={6}
                             otpBorderFocusedColor="#006ffd"

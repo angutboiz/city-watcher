@@ -171,7 +171,7 @@ const refreshToken = catchAsync(async (req, res) => {
 
 // Đăng xuất
 const logoutUser = catchAsync(async (req, res) => {
-    const { refreshToken } = req.cookies
+    const { refreshToken } = req.body
 
     const user = await User.findOne({ refreshToken })
     if (user.refreshToken !== refreshToken) {
@@ -190,6 +190,7 @@ const logoutUser = catchAsync(async (req, res) => {
 
 const forgetUser = catchAsync(async (req, res) => {
     const { email } = req.body
+    console.log(email)
     if (!email) {
         return ErrorResponse.badRequest(res, 'Vui lòng điền email của bạn')
     }
@@ -256,10 +257,28 @@ const changePassword = catchAsync(async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(new_password, 10)
-
+    const accessToken = generateAccessToken(user._id)
+    const refreshToken = generateRefreshToken(user._id)
     user.password = hashedPassword
+    user.refreshToken = refreshToken
+
+    res.cookie('accessToken', accessToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict',
+    })
+    res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict',
+    })
+
     await user.save()
-    return SuccessResponse.ok(res, 'Cập nhật mật khẩu thành công')
+    return SuccessResponse.ok(res, 'Cập nhật mật khẩu thành công', {
+        accessToken,
+        refreshToken,
+        user,
+    })
 })
 
 module.exports = {

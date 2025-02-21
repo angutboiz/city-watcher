@@ -14,7 +14,7 @@ import { Button, TextInput } from 'react-native-paper'
 import Icon from 'react-native-vector-icons/Ionicons'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
-const Welcome1 = () => {
+const Welcome1Screen = () => {
     const [text, setText] = useState('')
     const [show, setShow] = useState(false)
     const router = useRouter()
@@ -64,7 +64,7 @@ const Welcome1 = () => {
                                 top: 0,
                                 left: 10,
                             }}
-                            source={require('../assets/images/Vector.png')}
+                            source={require('@/app/assets/images/Vector1.png')}
                         />
 
                         {/* Main illustration */}
@@ -77,7 +77,7 @@ const Welcome1 = () => {
                                 left: '50%',
                                 transform: [{ translateX: -100 }],
                             }}
-                            source={require('../assets/images/test1.png')}
+                            source={require('@/app/assets/images/test1.png')}
                         />
 
                         {/* Bottom cloud */}
@@ -89,7 +89,7 @@ const Welcome1 = () => {
                                 bottom: -80,
                                 right: 20,
                             }}
-                            source={require('../assets/images/Vector1.png')}
+                            source={require('@/app/assets/images/Vector1.png')}
                         />
                     </View>
                 </View>
@@ -132,4 +132,4 @@ const Welcome1 = () => {
     )
 }
 
-export default Welcome1
+export default Welcome1Screen

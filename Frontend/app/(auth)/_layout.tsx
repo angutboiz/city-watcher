@@ -6,7 +6,11 @@ import Toast from 'react-native-toast-message'
 const AuthLayout = () => {
     return (
         <>
-            <Stack>
+            <Stack
+                screenOptions={{
+                    headerTintColor: '#fff',
+                }}
+            >
                 <Stack.Screen
                     name="login"
                     options={{
@@ -16,19 +20,30 @@ const AuthLayout = () => {
                 <Stack.Screen
                     name="register"
                     options={{
-                        headerShown: false,
+                        headerShown: true,
+                        title: 'Quên mật khẩu',
                     }}
                 />
-                <Stack.Screen
-                    name="forget"
-                    options={{
-                        headerShown: false,
-                    }}
-                />
+                <Stack.Screen name="forget" />
                 <Stack.Screen
                     name="forget-type-email"
                     options={{
-                        headerShown: false,
+                        headerShown: true,
+                        title: 'Quên mật khẩu',
+                    }}
+                />
+                <Stack.Screen
+                    name="send-forget-password-success"
+                    options={{
+                        headerShown: true,
+                        title: 'Gửi email thành công',
+                    }}
+                />
+                <Stack.Screen
+                    name="change-password"
+                    options={{
+                        headerShown: true,
+                        title: 'Thay đổi mật khẩu',
                     }}
                 />
             </Stack>
