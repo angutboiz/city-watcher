@@ -19,7 +19,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { setUser } from '@/store/features/userSlice'
 import { useDispatch } from 'react-redux'
 import ActionSheet, { useSheetRef } from 'react-native-actions-sheet'
-import { Button } from 'react-native-paper'
+import { Button, TextInput } from 'react-native-paper'
+import { Controller, useForm } from 'react-hook-form'
 
 const SettingItem = ({
     title,
@@ -43,15 +44,18 @@ const SettingScreen = () => {
     const { user, isAuthenticated } = useAuth()
     const dispatch = useDispatch()
     const ref = useSheetRef<'snap-me'>()
-    // const fetchProfile = async () => {
-    //     const { data } = await axiosAPI.get('/profile')
-    //     if (data.ok) {
-    //         setProfile(data.data)
-    //     }
-    // }
-    useEffect(() => {
-        // fetchProfile()
-    }, [])
+    const [loading, setLoading] = useState(false)
+    const {
+        control,
+        handleSubmit,
+        formState: { errors },
+    } = useForm({
+        defaultValues: {
+            displayName: user?.displayName,
+            profilePicture: user?.profilePicture,
+        },
+    })
+
     const handleChange = async (name_ui: string) => {
         if (name_ui === 'gui') return router.push('/setting/gui')
         if (name_ui === 'privacy') return router.push('/setting/privacy')
@@ -107,6 +111,21 @@ const SettingScreen = () => {
 
     const handleOpenEditProfile = () => {
         ref.current?.show()
+    }
+
+    const onSubmit = async (data: any) => {
+        try {
+            setLoading(true)
+            console.log(data)
+            const response = await axiosAPI.patch('/profile', data)
+            if (response.data.ok) {
+                setUser(response.data.update_profile)
+            }
+        } catch (error) {
+            console.error(error)
+        } finally {
+            setLoading(false)
+        }
     }
 
     return (
@@ -198,44 +217,74 @@ const SettingScreen = () => {
                 </View>
             </Modal>
             <ActionSheet gestureEnabled snapPoints={[70, 100]}>
-                <View
-                    style={{
-                        paddingHorizontal: 12,
-                        height: 400,
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: 10,
-                    }}
-                >
-                    <Text
-                        style={{
-                            color: 'black',
-                            fontSize: 30,
-                        }}
-                    >
-                        Swipe me up!
+                <View className="h-[500px] px-3 py-5 gap-5">
+                    <Text className="text-xl font-bold">
+                        Thay đổi thông tin người dùng
                     </Text>
+                    <View className="gap-3">
+                        <Controller
+                            control={control}
+                            name="displayName"
+                            rules={{
+                                required: 'Tên người dùng là bắt buộc',
+                                minLength: {
+                                    value: 6,
+                                    message: 'Tên người dùng tối thiểu 6 ký tự',
+                                },
+                            }}
+                            render={({ field: { onChange, value } }) => (
+                                <TextInput
+                                    label="Tên người dùng"
+                                    mode="outlined"
+                                    value={value}
+                                    onChangeText={onChange}
+                                    error={!!errors.displayName}
+                                    activeOutlineColor="#006ffd"
+                                />
+                            )}
+                        />
+                        {errors.displayName && (
+                            <Text style={{ color: '#ff0000' }}>
+                                {errors.displayName.message}
+                            </Text>
+                        )}
 
-                    <Text
-                        style={{
-                            color: 'black',
-                        }}
-                    >
-                        OR
-                    </Text>
-
+                        <Controller
+                            control={control}
+                            name="profilePicture"
+                            rules={{
+                                required: 'Mật khẩu là bắt buộc',
+                                minLength: {
+                                    value: 6,
+                                    message: 'Mật khẩu tối thiểu 6 ký tự',
+                                },
+                            }}
+                            render={({ field: { onChange, value } }) => (
+                                <TextInput
+                                    label="Ảnh đại diện"
+                                    mode="outlined"
+                                    value={value}
+                                    onChangeText={onChange}
+                                    error={!!errors.profilePicture}
+                                    activeOutlineColor="#006ffd"
+                                />
+                            )}
+                        />
+                        {errors.profilePicture && (
+                            <Text style={{ color: '#ff0000' }}>
+                                {errors.profilePicture.message}
+                            </Text>
+                        )}
+                    </View>
                     <Button
-                        onPress={() => {
-                            if (!ref.current) return
-                            ref.current.snapToIndex(
-                                ref.current?.currentSnapIndex() === 0 ? 1 : 0
-                            )
-                        }}
-                        style={{
-                            width: 250,
-                        }}
+                        mode="contained"
+                        className=" !rounded-lg "
+                        style={{ backgroundColor: '#007AFF' }}
+                        onPress={handleSubmit(onSubmit)}
+                        loading={loading}
+                        disabled={loading}
                     >
-                        Snap with a tap!
+                        Cập nhật thông tin
                     </Button>
                 </View>
             </ActionSheet>

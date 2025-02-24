@@ -141,6 +141,8 @@ const ForgetScreen = () => {
                             style={{ borderRadius: 10, marginTop: 10 }}
                             buttonColor="#006ffd"
                             onPress={handleSubmit(onSubmit)}
+                            loading={loading}
+                            disabled={loading}
                         >
                             Gửi mail
                         </Button>

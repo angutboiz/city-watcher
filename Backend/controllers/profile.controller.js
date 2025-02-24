@@ -45,7 +45,7 @@ const findProfileByManager = catchAsync(async (req, res) => {
 })
 
 const updateProfile = catchAsync(async (req, res) => {
-    const { status, profilePicture, verify, displayName } = req.body
+    const { status, profilePicture, verify, displayName, role } = req.body
     const { id } = req.user
     const updateFields = {} // Tạo đối tượng rỗng để chứa các trường cần cập nhật
 
@@ -73,7 +73,7 @@ const updateProfile = catchAsync(async (req, res) => {
             'Cập nhật thông tin không thành công'
         )
     }
-    return SuccessResponse.ok(res, 'Cập nhật thành công', update_profile)
+    return SuccessResponse.ok(res, 'Cập nhật thành công', { update_profile })
 })
 const updateRole = catchAsync(async (req, res) => {
     const { id, roles } = req.body

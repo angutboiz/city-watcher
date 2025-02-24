@@ -17,7 +17,7 @@ const ErrorResponse = require('../core/error.response')
 const catchAsync = require('../middleware/catchAsync')
 
 const registerUser = catchAsync(async (req, res) => {
-    const { email, password } = req.body
+    const { email, password, zone } = req.body
     if (!email || !password) {
         return ErrorResponse.badRequest(
             res,
@@ -47,6 +47,7 @@ const registerUser = catchAsync(async (req, res) => {
         // phoneNumber,
         email,
         password: hashedPassword,
+        zone: zone.value,
         otp,
         expire_otp: Date.now() + 1000 * 60 * 10, // thời hạn 10 phút
     })
@@ -75,6 +76,7 @@ const registerUser = catchAsync(async (req, res) => {
     return SuccessResponse.created(res, 'Đăng ký thành công', {
         accessToken,
         refreshToken,
+        newUser,
     })
 })
 
@@ -92,7 +94,7 @@ const loginUser = catchAsync(async (req, res) => {
     }
 
     if (!user.status) {
-        return ErrorResponse.badRequest(res, 'Tài khoản đã bị khoá')
+        return ErrorResponse.badRequest(res, 'Tài khoản chưa xác thực OTP')
     }
     //Nhớ mở lại
     // if (!user.verify) {
@@ -281,6 +283,27 @@ const changePassword = catchAsync(async (req, res) => {
     })
 })
 
+const checkOTP = catchAsync(async (req, res) => {
+    const { otp } = req.body
+    const { id } = req.user
+
+    if (!otp) {
+        return ErrorResponse.badRequest(res, 'Vui lòng điền mã OTP')
+    }
+    const findUser = await User.findById(id).lean()
+
+    if (!findUser) {
+        return ErrorResponse.badRequest(res, 'Email không tồn tại')
+    }
+
+    if (findUser.otp != otp)
+        return ErrorResponse.badRequest(res, 'Mã OTP không đúng')
+
+    findUser.status = true
+    await findUser.save()
+    return SuccessResponse.ok(res, 'Xác thực thành công')
+})
+
 module.exports = {
     registerUser,
     loginUser,
@@ -288,4 +311,5 @@ module.exports = {
     refreshToken,
     forgetUser,
     changePassword,
+    checkOTP,
 }

@@ -6,6 +6,7 @@ const {
     changePassword,
     logoutUser,
     refreshToken,
+    checkOTP,
 } = require('../controllers/auth.controller')
 const { checkAdmin, verifyToken } = require('../middleware/auth.middleware.js')
 const router = express.Router()
@@ -170,4 +171,5 @@ router.post('/refresh-token', verifyToken, refreshToken)
  */
 router.post('/change-password', verifyToken, changePassword)
 
+router.post('/check-otp', verifyToken, checkOTP)
 module.exports = router

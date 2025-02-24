@@ -46,6 +46,13 @@ const AuthLayout = () => {
                         title: 'Thay đổi mật khẩu',
                     }}
                 />
+                <Stack.Screen
+                    name="otp"
+                    options={{
+                        headerShown: true,
+                        title: 'Xác nhận mã OTP',
+                    }}
+                />
             </Stack>
             <Toast />
             {/* <Loader isLoading={loading} /> */}
