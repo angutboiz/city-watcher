@@ -290,14 +290,14 @@ const checkOTP = catchAsync(async (req, res) => {
     if (!otp) {
         return ErrorResponse.badRequest(res, 'Vui lòng điền mã OTP')
     }
-    const findUser = await User.findById(id).lean()
+    const findUser = await User.findById(id)    
 
     if (!findUser) {
         return ErrorResponse.badRequest(res, 'Email không tồn tại')
     }
 
     if (findUser.otp != otp)
-        return ErrorResponse.badRequest(res, 'Mã OTP không đúng')
+        return ErrorResponse.badRequest(res, 'Mã OTP không đúng')   
 
     findUser.status = true
     await findUser.save()
