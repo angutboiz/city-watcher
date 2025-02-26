@@ -46,6 +46,7 @@ const findProfileByManager = catchAsync(async (req, res) => {
 
 const updateProfile = catchAsync(async (req, res) => {
     const { status, profilePicture, verify, displayName, role } = req.body
+    console.log(displayName)
     const { id } = req.user
     const updateFields = {} // Tạo đối tượng rỗng để chứa các trường cần cập nhật
 

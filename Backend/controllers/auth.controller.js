@@ -141,7 +141,8 @@ const loginUser = catchAsync(async (req, res) => {
 
 // Refresh Token để cấp lại Access Token mới
 const refreshToken = catchAsync(async (req, res) => {
-    const { refreshToken } = req.cookies
+    const { refreshToken } = req.body
+    console.log('refreshToken:::', refreshToken)
     if (!refreshToken)
         return ErrorResponse.unauthorized(res, 'Không có Refresh Token')
 
@@ -290,7 +291,7 @@ const checkOTP = catchAsync(async (req, res) => {
     if (!otp) {
         return ErrorResponse.badRequest(res, 'Vui lòng điền mã OTP')
     }
-    const findUser = await User.findById(id).lean()
+    const findUser = await User.findById(id)
 
     if (!findUser) {
         return ErrorResponse.badRequest(res, 'Email không tồn tại')

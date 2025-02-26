@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken')
 // Tạo Access Token (hết hạn sau 15 phút)
 const generateAccessToken = (userId) => {
     return jwt.sign({ id: userId }, process.env.ACCESS_TOKEN_SECRET, {
-        expiresIn: '30m',
+        expiresIn: '30s',
     })
 }
 
