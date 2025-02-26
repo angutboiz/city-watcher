@@ -3,8 +3,8 @@ import { getTokens, saveTokens, removeTokens } from './tokenStorage'
 import Toast from 'react-native-toast-message'
 import { ToastAndroid } from 'react-native'
 const axiosAPI = axios.create({
-    // baseURL: 'http://10.0.2.2:5000/api/v1',
-    baseURL: 'http://192.168.33.73:5000/api/v1',
+     baseURL: 'http://10.0.2.2:5000/api/v1',
+    //baseURL: 'http://192.168.33.73:5000/api/v1',
 })
 
 let isRefreshing = false
