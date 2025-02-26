@@ -2,15 +2,31 @@
     "version": 2,
     "builds": [
         {
-            "src": "index.js",
-            "use": "@vercel/node",
-            "config": { "includeFiles": ["dist/**"] }
+            "src": "Backend/index.js",
+            "use": "@vercel/node"
         }
     ],
     "routes": [
         {
-            "src": "/(.*)",
-            "dest": "index.js"
+            "src": "/api-docs/(.*)",
+            "dest": "Backend/index.js"
+        },
+        {
+            "src": "/api/v1/(.*)",
+            "dest": "Backend/index.js"
+        }
+    ],
+    "headers": [
+        {
+            "source": "/api-docs/(.*)",
+            "headers": [
+                { "key": "Access-Control-Allow-Origin", "value": "*" },
+                { "key": "Content-Type", "value": "application/javascript" },
+                {
+                    "key": "Content-Security-Policy",
+                    "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';"
+                }
+            ]
         }
     ]
 }

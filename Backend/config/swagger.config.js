@@ -12,6 +12,10 @@ const swaggerOptions = {
                 url: 'http://localhost:5000',
                 description: 'Local server',
             },
+            {
+                url: 'https://city-watcher.vercel.app',
+                description: 'Production server',
+            },
         ],
         components: {
             securitySchemes: {
