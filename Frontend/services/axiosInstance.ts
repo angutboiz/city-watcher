@@ -4,7 +4,7 @@ import Toast from 'react-native-toast-message'
 import { ToastAndroid } from 'react-native'
 const axiosAPI = axios.create({
     // baseURL: 'http://10.0.2.2:5000/api/v1',
-    baseURL: 'http://172.23.242.212:5000/api/v1',
+    baseURL: 'http://192.168.33.73:5000/api/v1',
 })
 
 let isRefreshing = false
@@ -35,73 +35,87 @@ axiosAPI.interceptors.request.use(
     (error) => Promise.reject(error)
 )
 
-// axiosAPI.interceptors.response.use(
-//     (response) => response,
-//     async (error: AxiosError) => {
-//         const originalRequest = error.config as InternalAxiosRequestConfig & {
-//             _retry?: boolean
-//         }
-//         if (error.response?.status === 401 && !originalRequest._retry) {
-//             if (isRefreshing) {
-//                 return new Promise<string>((resolve, reject) => {
-//                     failedQueue.push({ resolve, reject })
-//                 })
-//                     .then((token) => {
-//                         originalRequest.headers.Authorization = `Bearer ${token}`
-//                         return axiosAPI(originalRequest)
-//                     })
-//                     .catch((err) => Promise.reject(err))
-//             }
-
-//             originalRequest._retry = true
-//             isRefreshing = true
-
-//             try {
-//                 const tokens = await getTokens()
-//                 const { data } = await axios.post<{
-//                     access_token: string
-//                     refresh_token: string
-//                 }>('http://10.0.2.2:5000/api/v1/auth/refresh-token', {
-//                     refresh_token: tokens?.refreshToken,
-//                 })
-
-//                 await saveTokens(data.access_token, data.refresh_token)
-//                 axiosAPI.defaults.headers.common.Authorization = `Bearer ${data.access_token}`
-//                 processQueue(null, data.access_token)
-
-//                 return axiosAPI(originalRequest)
-//             } catch (err) {
-//                 processQueue(err as AxiosError, null)
-//                 await removeTokens()
-//                 return Promise.reject(err)
-//             } finally {
-//                 isRefreshing = false
-//             }
-//         }
-
-//         return Promise.reject(error)
-//     }
-// )
 axiosAPI.interceptors.response.use(
-    (response) => response, // Trả về response nếu thành công
-    (error) => {
+    (response) => response,
+    async (error: AxiosError) => {
+        const originalRequest = error.config as InternalAxiosRequestConfig & {
+            _retry?: boolean
+            data?: any // Thêm type cho data
+        }
+
+        // Kiểm tra lỗi 401 và chưa retry
+        if (error.response?.status === 401 && !originalRequest._retry) {
+            if (isRefreshing) {
+                try {
+                    const token = await new Promise<string>(
+                        (resolve, reject) => {
+                            failedQueue.push({ resolve, reject })
+                        }
+                    )
+
+                    // Cập nhật lại token cho request
+                    originalRequest.headers.Authorization = `Bearer ${token}`
+                    // Đảm bảo giữ nguyên data của request gốc
+                    return axiosAPI({
+                        ...originalRequest,
+                        data: JSON.parse(originalRequest.data || '{}'),
+                    })
+                } catch (err) {
+                    return Promise.reject(err)
+                }
+            }
+
+            originalRequest._retry = true
+            isRefreshing = true
+
+            try {
+                const tokens = await getTokens()
+                const { data } = await axios.post(
+                    'http://192.168.1.5:5000/api/v1/auth/refresh-token',
+                    { refreshToken: tokens?.refreshToken }
+                )
+
+                await saveTokens(data.accessToken, data.refreshToken)
+                axiosAPI.defaults.headers.common.Authorization = `Bearer ${data.accessToken}`
+
+                // Xử lý queue và cập nhật token
+                processQueue(null, data.accessToken)
+
+                // Gửi lại request gốc với token mới và data gốc
+                return axiosAPI({
+                    ...originalRequest,
+                    headers: {
+                        ...originalRequest.headers,
+                        Authorization: `Bearer ${data.accessToken}`,
+                    },
+                    data: JSON.parse(originalRequest.data || '{}'),
+                })
+            } catch (err) {
+                processQueue(err as AxiosError, null)
+                await removeTokens()
+                return Promise.reject(err)
+            } finally {
+                isRefreshing = false
+            }
+        }
+
+        // Xử lý các lỗi khác
         if (error.response) {
-            const { status, data } = error.response
-            // console.error('📌 API Error:', status, data)
-
-            // Hiển thị Alert hoặc Toast khi gặp lỗi
-            ToastAndroid.show(data.message, ToastAndroid.SHORT)
-        } else if (error.request) {
-            // console.error('📌 No Response from Server:', error.request)
-
+            const { data } = error.response
             ToastAndroid.show(
-                error.message ||
-                    'Không thể kết nối đến server, vui lòng kiểm tra mạng!',
+                data?.message || 'Có lỗi xảy ra',
+                ToastAndroid.SHORT
+            )
+        } else if (error.request) {
+            ToastAndroid.show(
+                'Không thể kết nối đến server, vui lòng kiểm tra mạng!',
                 ToastAndroid.SHORT
             )
         } else {
-            // console.error('📌 Request Error:', error.message)
-            ToastAndroid.show(error.message, ToastAndroid.SHORT)
+            ToastAndroid.show(
+                error.message || 'Có lỗi xảy ra',
+                ToastAndroid.SHORT
+            )
         }
 
         return Promise.reject(error)

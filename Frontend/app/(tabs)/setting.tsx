@@ -19,7 +19,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { setUser } from '@/store/features/userSlice'
 import { useDispatch } from 'react-redux'
 import ActionSheet, { useSheetRef } from 'react-native-actions-sheet'
-import { Button } from 'react-native-paper'
+import { Button, TextInput } from 'react-native-paper'
+import { Controller, useForm } from 'react-hook-form'
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
+import * as ImagePicker from 'expo-image-picker'
 
 const SettingItem = ({
     title,
@@ -43,36 +46,25 @@ const SettingScreen = () => {
     const { user, isAuthenticated } = useAuth()
     const dispatch = useDispatch()
     const ref = useSheetRef<'snap-me'>()
-    // const fetchProfile = async () => {
-    //     const { data } = await axiosAPI.get('/profile')
-    //     if (data.ok) {
-    //         setProfile(data.data)
-    //     }
-    // }
-    useEffect(() => {
-        // fetchProfile()
-    }, [])
+    const [loading, setLoading] = useState(false)
+    const [images, setImages] = useState<string>(user?.profilePicture || '')
+
+    const {
+        control,
+        handleSubmit,
+        formState: { errors },
+    } = useForm({
+        defaultValues: {
+            displayName: user?.displayName,
+        },
+    })
+
     const handleChange = async (name_ui: string) => {
         if (name_ui === 'gui') return router.push('/setting/gui')
         if (name_ui === 'privacy') return router.push('/setting/privacy')
         if (name_ui === 'language') return router.push('/setting/language')
-        if (name_ui === 'change-password') {
-            try {
-                const response = await axiosAPI.post('/auth/forget', {
-                    email: user?.email,
-                })
-
-                if (response.data.ok) {
-                    ToastAndroid.show(response.data.message, ToastAndroid.SHORT)
-                    return router.push({
-                        pathname: '/(auth)/change-password',
-                        params: { email: user?.email },
-                    })
-                }
-            } catch (error) {
-                ToastAndroid.show('Đăng nhập thất bại', ToastAndroid.SHORT)
-            }
-        }
+        if (name_ui === 'change-password')
+            return router.push('/(auth)/change-password')
     }
 
     const handleLogout = async () => {
@@ -107,6 +99,60 @@ const SettingScreen = () => {
 
     const handleOpenEditProfile = () => {
         ref.current?.show()
+    }
+
+    const onSubmit = async (data: any) => {
+        try {
+            setLoading(true)
+            console.log(data)
+            const response = await axiosAPI.patch('/profile', data)
+            if (response.data.ok) {
+                ToastAndroid.show(response.data.message, ToastAndroid.SHORT)
+
+                setUser(response.data.update_profile)
+            }
+        } catch (error) {
+            console.error(error)
+            ToastAndroid.show(error, ToastAndroid.SHORT)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const pickImage = async () => {
+        try {
+            // Request permissions
+            const { status } =
+                await ImagePicker.requestMediaLibraryPermissionsAsync()
+
+            if (status !== 'granted') {
+                ToastAndroid.show(
+                    'Xin lỗi, chúng tôi cần quyền truy cập thư viện ảnh để thực hiện chức năng này!',
+                    ToastAndroid.SHORT
+                )
+
+                return
+            }
+
+            // Launch image picker
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                allowsMultipleSelection: false,
+                quality: 0.8,
+                aspect: [4, 3],
+            })
+
+            if (!result.canceled && result.assets) {
+                const selectedImage = result.assets[0].uri
+                setImages(selectedImage)
+            }
+        } catch (error) {
+            console.error('Error picking image:', error)
+            ToastAndroid.show(
+                'Có lỗi xảy ra khi tải ảnh. Vui lòng thử lại!',
+                ToastAndroid.SHORT
+            )
+        }
     }
 
     return (
@@ -197,48 +243,78 @@ const SettingScreen = () => {
                     </View>
                 </View>
             </Modal>
-            <ActionSheet gestureEnabled snapPoints={[70, 100]}>
-                <View
-                    style={{
-                        paddingHorizontal: 12,
-                        height: 400,
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: 10,
-                    }}
-                >
-                    <Text
-                        style={{
-                            color: 'black',
-                            fontSize: 30,
-                        }}
-                    >
-                        Swipe me up!
-                    </Text>
+            <KeyboardAwareScrollView>
+                <ActionSheet>
+                    <View className="h-[500px] px-3 py-5 gap-5">
+                        <Text className="text-xl font-bold">
+                            Thay đổi thông tin người dùng
+                        </Text>
+                        <View className="items-center ">
+                            <Pressable
+                                className="relative w-[80px] h-[80px]"
+                                onPress={pickImage}
+                            >
+                                <Image
+                                    source={{ uri: images }}
+                                    style={{
+                                        width: 80,
+                                        height: 80,
+                                        borderRadius: 50,
+                                    }}
+                                ></Image>
 
-                    <Text
-                        style={{
-                            color: 'black',
-                        }}
-                    >
-                        OR
-                    </Text>
-
-                    <Button
-                        onPress={() => {
-                            if (!ref.current) return
-                            ref.current.snapToIndex(
-                                ref.current?.currentSnapIndex() === 0 ? 1 : 0
-                            )
-                        }}
-                        style={{
-                            width: 250,
-                        }}
-                    >
-                        Snap with a tap!
-                    </Button>
-                </View>
-            </ActionSheet>
+                                <View className="absolute w-8 h-8 rounded-full items-center justify-center bg-gray-200 -bottom-1 right-1">
+                                    <Ionicons
+                                        name="camera"
+                                        size={16}
+                                        color="black"
+                                    />
+                                </View>
+                            </Pressable>
+                        </View>
+                        <View className="gap-3">
+                            <Controller
+                                control={control}
+                                name="displayName"
+                                rules={{
+                                    required: 'Tên người dùng là bắt buộc',
+                                    minLength: {
+                                        value: 4,
+                                        message:
+                                            'Tên người dùng tối thiểu 4 ký tự',
+                                    },
+                                }}
+                                render={({ field: { onChange, value } }) => (
+                                    <TextInput
+                                        label="Tên người dùng"
+                                        mode="outlined"
+                                        autoFocus
+                                        value={value}
+                                        onChangeText={onChange}
+                                        error={!!errors.displayName}
+                                        activeOutlineColor="#006ffd"
+                                    />
+                                )}
+                            />
+                            {errors.displayName && (
+                                <Text style={{ color: '#ff0000' }}>
+                                    {errors.displayName.message}
+                                </Text>
+                            )}
+                        </View>
+                        <Button
+                            mode="contained"
+                            className=" !rounded-lg "
+                            style={{ backgroundColor: '#007AFF' }}
+                            onPress={handleSubmit(onSubmit)}
+                            loading={loading}
+                            disabled={loading}
+                        >
+                            Cập nhật thông tin
+                        </Button>
+                    </View>
+                </ActionSheet>
+            </KeyboardAwareScrollView>
         </SafeAreaView>
     )
 }

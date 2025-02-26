@@ -19,8 +19,13 @@ export const saveTokens = async (
 
 export const getTokens = async (): Promise<Tokens | null> => {
     try {
-        const data = await AsyncStorage.getItem('accessToken')
-        return data ? { accessToken: data, refreshToken: '' } : null
+        const accessToken = await AsyncStorage.getItem('accessToken')
+        const refreshToken = await AsyncStorage.getItem('refreshToken')
+        const data = await AsyncStorage.getAllKeys()
+        console.log(data)
+        return accessToken && refreshToken
+            ? { accessToken, refreshToken }
+            : null
     } catch (error) {
         console.error('Lỗi khi lấy token:', error)
         return null

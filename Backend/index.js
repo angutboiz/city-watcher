@@ -1,6 +1,6 @@
 const express = require('express')
 const cors = require('cors')
-const { requestLogger } = require('./core/logger')
+// const { requestLogger } = require('./core/logger')
 const errorHandler = require('./middleware/errorHandler')
 
 const connectDB = require('./config/db.config')
@@ -33,7 +33,7 @@ app.use(helmet())
 app.use(compression())
 
 // Middleware ghi lại request của người dùng xuống file requests.log
-app.use(requestLogger)
+// app.use(requestLogger)
 
 app.use(require('./routes/index'))
 // app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerFile))

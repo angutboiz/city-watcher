@@ -74,28 +74,7 @@ const LoginScreen = () => {
         }
     }
 
-    // const checkSkipWelcome = async () => {
-    //     const checkSkipWelcome = await AsyncStorage.getItem('skipWelcome')
-    //     if (checkSkipWelcome) {
-    //         router.push('/(auth)/login')
-    //     }
-    // }
-
-    useEffect(() => {
-        // checkSkipWelcome()
-        // if (isAuthenticated) {
-        //     router.push('/(tabs)/home')
-        // }
-    }, [])
-
     const handleForgetPassword = (email: string) => {
-        // if (email) {
-        //     router.push({
-        //         pathname: '/(auth)/forget',
-        //         params: { email: email },
-        //     })
-        // } else {
-        // }
         router.push('/(auth)/forget-type-email')
     }
 
@@ -106,16 +85,7 @@ const LoginScreen = () => {
             extraScrollHeight={100}
             className="flex-1"
         >
-            <SafeAreaView className="relative flex-1">
-                {loading && (
-                    <View className="absolute flex-1 w-full h-full z-10 top-0 right-0 left-0 bottom-0 bg-gray-900/50 flex items-center justify-center">
-                        <ActivityIndicator
-                            animating={true}
-                            size={30}
-                            color={MD2Colors.blue400}
-                        />
-                    </View>
-                )}
+            <SafeAreaView className=" flex-1">
                 <Image
                     style={styles.logo}
                     className="rounded-b-3xl"
@@ -208,6 +178,8 @@ const LoginScreen = () => {
                             style={{ borderRadius: 10 }}
                             buttonColor="#006ffd"
                             onPress={handleSubmit(onSubmit)}
+                            loading={loading}
+                            disabled={loading}
                         >
                             Đăng nhập
                         </Button>

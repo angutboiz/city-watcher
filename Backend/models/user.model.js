@@ -54,14 +54,14 @@ const UserSchema = new mongoose.Schema(
         },
         roles: {
             type: String,
-            // default: 'user',
-            default: 'admin',
+            default: 'user',
+            // default: 'admin',
             required: true,
             enum: ['user', 'admin', 'manager'],
         },
         status: {
             type: Boolean,
-            default: true,
+            default: false, // trạng thái tài khoản, mặc định là false
         },
         profilePicture: {
             type: String,

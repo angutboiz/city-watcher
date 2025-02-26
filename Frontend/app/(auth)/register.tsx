@@ -1,4 +1,4 @@
-import { StyleSheet, View } from 'react-native'
+import { StyleSheet, ToastAndroid, View } from 'react-native'
 import React, { useState } from 'react'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -14,9 +14,12 @@ import {
     TextInput,
 } from 'react-native-paper'
 import { Controller } from 'react-hook-form'
-import { Link } from 'expo-router'
+import { Link, useRouter } from 'expo-router'
 import axiosAPI from '@/services/axiosInstance'
 import { Dropdown } from 'react-native-element-dropdown'
+import { saveTokens } from '@/services/tokenStorage'
+import { setUser } from '@/store/features/userSlice'
+import { useDispatch } from 'react-redux'
 
 const OPTIONS = [
     { label: 'Tân Uyên', value: 'Tân Uyên' },
@@ -31,9 +34,6 @@ const OPTIONS = [
 ]
 
 const RegisterScreen = () => {
-    const [value, setValue] = useState(null)
-    const [isFocus, setIsFocus] = useState(false)
-
     const {
         control,
         handleSubmit,
@@ -52,18 +52,25 @@ const RegisterScreen = () => {
     const [showPassword, setShowPassword] = useState(false)
     const [showConfirmPassword, setShowConfirmPassword] = useState(false)
     const [loading, setLoading] = useState(false)
-
+    const router = useRouter()
     const password = watch('password')
-
+    const dispatch = useDispatch()
     const onSubmit = async (data: any) => {
+        console.log(data)
         try {
             setLoading(true)
-            console.log(data)
             const response = await axiosAPI.post('/auth/register', data)
             if (response.data.ok) {
-                console.log('Register success')
-            } else {
-                console.log('Register failed')
+                ToastAndroid.show(response.data.message, ToastAndroid.SHORT)
+                await saveTokens(
+                    response.data?.data.accessToken,
+                    response.data?.data.refreshToken
+                )
+                dispatch(setUser(response.data?.data.user))
+                router.push({
+                    pathname: '/otp',
+                    params: { email: data.email },
+                })
             }
         } catch (error) {
             console.error(error)
@@ -79,16 +86,7 @@ const RegisterScreen = () => {
             extraScrollHeight={100}
             className="flex-1"
         >
-            <SafeAreaView className="flex-1 relative">
-                {loading && (
-                    <View className="absolute flex-1 w-full h-full z-10 top-0 right-0 left-0 bottom-0 bg-gray-900/50 flex items-center justify-center">
-                        <ActivityIndicator
-                            animating={true}
-                            size={30}
-                            color={MD2Colors.blue400}
-                        />
-                    </View>
-                )}
+            <SafeAreaView className="flex-1">
                 <View className="px-6 py-10">
                     <Text className="text-2xl font-bold text-[#006ffd] mb-6">
                         Đăng ký tài khoản
@@ -252,9 +250,7 @@ const RegisterScreen = () => {
                                     placeholder="Chọn huyện"
                                     searchPlaceholder="Tìm tên huyện tỉnh Bình Dương..."
                                     value={value}
-                                    onChange={(item) => {
-                                        setValue(item.value)
-                                    }}
+                                    onChange={onChange}
                                 />
                             )}
                         />
@@ -315,6 +311,7 @@ const RegisterScreen = () => {
                         className="mt-10"
                         onPress={handleSubmit(onSubmit)}
                         loading={loading}
+                        disabled={loading}
                         style={{ borderRadius: 10 }}
                         buttonColor="#006ffd"
                     >
@@ -331,6 +328,7 @@ const RegisterScreen = () => {
                             Đăng nhập ngay
                         </Link>
                     </View>
+
                     <View className="w-full mt-10">
                         <View className="text-center">
                             <Text className="text-center mb-3 w-full">
@@ -355,9 +353,10 @@ const styles = StyleSheet.create({
     dropdown: {
         margin: 0,
         padding: 15,
+        borderRadius: 5,
         height: 50,
         borderColor: 'gray',
-        borderWidth: 0.5,
+        borderWidth: 1,
     },
 
     placeholderStyle: {
@@ -370,5 +369,9 @@ const styles = StyleSheet.create({
     inputSearchStyle: {
         height: 40,
         fontSize: 16,
+    },
+    iconStyle: {
+        width: 20,
+        height: 20,
     },
 })

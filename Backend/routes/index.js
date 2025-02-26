@@ -15,10 +15,20 @@ const { checkAdmin, verifyToken } = require('../middleware/auth.middleware.js')
 const swaggerOptions = require('../config/swagger.config')
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions)
+// Cấu hình options cho swagger-ui-express
+const swaggerUiOptions = {
+    customSiteTitle: 'CityWatcher API Documentation',
+    swaggerOptions: {
+        persistAuthorization: true,
+    },
+    customCss: '.swagger-ui .topbar { display: none }',
+    customfavIcon: '/assets/favicon.ico',
+    swaggerUrl: '/swagger.json',
+}
 
 // Sử dụng Swagger UI
-router.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs))
-
+router.use('/api-docs', swaggerUi.serve)
+router.get('/api-docs', swaggerUi.setup(swaggerDocs, swaggerUiOptions))
 // Thêm các route vào API
 router.use('/api/v1/auth', authRoutes)
 router.use('/api/v1/profile', profileRoutes)
