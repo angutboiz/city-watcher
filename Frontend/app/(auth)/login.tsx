@@ -74,28 +74,7 @@ const LoginScreen = () => {
         }
     }
 
-    // const checkSkipWelcome = async () => {
-    //     const checkSkipWelcome = await AsyncStorage.getItem('skipWelcome')
-    //     if (checkSkipWelcome) {
-    //         router.push('/(auth)/login')
-    //     }
-    // }
-
-    useEffect(() => {
-        // checkSkipWelcome()
-        // if (isAuthenticated) {
-        //     router.push('/(tabs)/home')
-        // }
-    }, [])
-
     const handleForgetPassword = (email: string) => {
-        // if (email) {
-        //     router.push({
-        //         pathname: '/(auth)/forget',
-        //         params: { email: email },
-        //     })
-        // } else {
-        // }
         router.push('/(auth)/forget-type-email')
     }
 
