@@ -26,12 +26,47 @@ const IncidentScreen = () => {
     } | null>(null)
     const [showMap, setShowMap] = useState(false)
     const [isPinning, setIsPinning] = useState(false)
+    const [showProblemTypePicker, setShowProblemTypePicker] = useState(false)
+    const [selectedProblemType, setSelectedProblemType] = useState<string | null>(null)
 
     const managers = [
         'Bùi Xuân Quang - QLKV Dĩ An',
         'Nguyễn Văn A - QLKV Thủ Đức',
         'Trần Thị B - QLKV Bình Thạnh',
         'Lê Văn C - QLKV Quận 9',
+    ]
+
+    const problemTypes = [
+        {
+            id: 1,
+            title: 'Công trình và cơ sở hạ tầng công cộng',
+            icon: require('../assets/images/anh1.png'),
+        },
+        {
+            id: 2,
+            title: 'Một số tình huống nguy cấp',
+            icon: require('../assets/images/anh4.png'),
+        },
+        {
+            id: 3,
+            title: 'Hạ tầng giao thông',
+            icon: require('../assets/images/anh2.png'),
+        },
+        {
+            id: 4,
+            title: 'Môi trường và vệ sinh công cộng',
+            icon: require('../assets/images/anh5.png'),
+        },
+        {
+            id: 5,
+            title: 'Sự cố điện, nước, viễn thông',
+            icon: require('../assets/images/anh3.png'),
+        },
+        {
+            id: 6,
+            title: 'An ninh, trật tự và an toàn xã hội',
+            icon: require('../assets/images/anh6.png'),
+        },
     ]
 
     const pickImage = async () => {
@@ -41,7 +76,7 @@ const IncidentScreen = () => {
                 await ImagePicker.requestMediaLibraryPermissionsAsync()
 
             if (status !== 'granted') {
-                alert(
+                alert(  
                     'Xin lỗi, chúng tôi cần quyền truy cập thư viện ảnh để thực hiện chức năng này!'
                 )
                 return
@@ -122,6 +157,20 @@ const IncidentScreen = () => {
                         placeholder="Nhập tiêu đề của sự cố"
                         placeholderTextColor="#999"
                     />
+                </View>
+
+                {/* Problem Type Input */}
+                <View style={styles.formGroup}>
+                    <Text style={styles.label}>Chọn thể loại sự cố</Text>
+                    <Pressable
+                        style={styles.select}
+                        onPress={() => setShowProblemTypePicker(true)}
+                    >
+                        <Text style={styles.selectText}>
+                            {selectedProblemType || 'Vui lòng chọn thể loại sự cố'}
+                        </Text>
+                        <Ionicons name="chevron-down" size={20} color="#000" />
+                    </Pressable>
                 </View>
 
                 {/* Description Input */}
@@ -369,6 +418,57 @@ const IncidentScreen = () => {
                         <Text style={styles.confirmButtonText}>
                             Xác nhận vị trí
                         </Text>
+                    </Pressable>
+                </SafeAreaView>
+            </Modal>
+
+            {/* Problem Type Modal */}
+            <Modal
+                visible={showProblemTypePicker}
+                animationType="slide"
+                style={styles.fullScreenModal}
+            >
+                <SafeAreaView style={styles.modalContainer}>
+                    <View style={styles.modalHeader}>
+                        <Text style={styles.modalTitle}>Chọn thể loại sự cố</Text>
+                        <Pressable
+                            onPress={() => setShowProblemTypePicker(false)}
+                            style={styles.closeButton}
+                        >
+                            <Ionicons name="close" size={24} color="#000" />
+                        </Pressable>
+                    </View>
+                    
+                    <ScrollView style={styles.problemTypeContainer}>
+                        <View style={styles.problemTypeGrid}>
+                            {problemTypes.map((type) => (
+                                <Pressable
+                                    key={type.id}
+                                    style={[
+                                        styles.problemTypeItem,
+                                        selectedProblemType === type.title && styles.selectedProblemType
+                                    ]}
+                                    onPress={() => setSelectedProblemType(type.title)}
+                                >
+                                    <View style={styles.problemTypeIcon}>
+                                        <Image 
+                                            source={type.icon}
+                                            style={styles.problemTypeIconImage}
+                                        />
+                                    </View>
+                                    <Text style={styles.problemTypeText}>{type.title}</Text>
+                                </Pressable>
+                            ))}
+                        </View>
+                    </ScrollView>
+
+                    <Pressable
+                        style={styles.selectButton}
+                        onPress={() => {
+                            setShowProblemTypePicker(false)
+                        }}
+                    >
+                        <Text style={styles.selectButtonText}>Chọn</Text>
                     </Pressable>
                 </SafeAreaView>
             </Modal>
@@ -628,4 +728,62 @@ const styles = StyleSheet.create({
     pinButtonActive: {
         backgroundColor: '#007AFF',
     },
+    fullScreenModal: {
+        flex: 1,
+        backgroundColor: '#fff',
+    },
+    problemTypeContainer: {
+        flex: 1,
+        padding: 8,
+    },
+    problemTypeGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+    },
+    problemTypeItem: {
+        width: '48%',
+        height: 200,
+        marginTop: 10,
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    selectedProblemType: {
+        borderWidth: 2,
+        borderColor: '#007AFF',
+    },
+    problemTypeIcon: {
+        width: '90%',
+        height: 150,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    problemTypeIconImage: {
+        width: 300,
+        height: 120,
+        resizeMode: 'contain',
+    },
+    problemTypeText: {
+        fontSize: 16,
+        textAlign: 'center',
+        color: '#000',
+        paddingHorizontal: 8,
+        marginBottom: 10,
+    },
+    selectButton: {
+        backgroundColor: '#007AFF',
+        margin: 20,
+        padding: 16,
+        borderRadius: 12,
+        alignItems: 'center',
+    },
+    selectButtonText: {
+        color: '#fff',
+        fontSize: 18,
+        fontWeight: '600',
+    },
 })
+function alert(arg0: string) {
+    throw new Error('Function not implemented.')
+}
+
