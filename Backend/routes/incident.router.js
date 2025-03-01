@@ -192,6 +192,66 @@ router.patch('/status/:id', changeStatusIncident)
  */
 router.delete('/:id', deleteIncident)
 
+/**
+ * @swagger
+ * /api/incidents/nearby:
+ *   post:
+ *     summary: Lấy danh sách sự cố gần vị trí người dùng
+ *     tags: [Incident]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               longitude:
+ *                 type: number
+ *                 example: 105.8342
+ *               latitude:
+ *                 type: number
+ *                 example: 21.0285
+ *     responses:
+ *       200:
+ *         description: Lấy danh sách sự cố gần thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                         example: "60d5ec49f1b2c8b1f8e4e1a1"
+ *                       title:
+ *                         type: string
+ *                         example: "Sự cố giao thông"
+ *                       desc:
+ *                         type: string
+ *                         example: "Có một vụ tai nạn trên đường phố."
+ *                       location:
+ *                         type: object
+ *                         properties:
+ *                           type:
+ *                             type: string
+ *                             example: "Point"
+ *                           coordinates:
+ *                             type: array
+ *                             items:
+ *                               type: number
+ *                             example: [105.8342, 21.0285]
+ *       400:
+ *         description: Tọa độ không hợp lệ
+ *       500:
+ *         description: Lỗi server
+ */
 router.post('/nearby', getNearbyIncidents)
 
 module.exports = router
