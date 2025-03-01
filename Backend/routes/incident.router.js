@@ -6,6 +6,7 @@ const {
     updateIncident,
     deleteIncident,
     changeStatusIncident,
+    getNearbyIncidents,
 } = require('../controllers/incident.controller')
 const router = express.Router()
 
@@ -190,5 +191,7 @@ router.patch('/status/:id', changeStatusIncident)
  *         description: Xóa báo cáo sự cố thành công
  */
 router.delete('/:id', deleteIncident)
+
+router.post('/nearby', getNearbyIncidents)
 
 module.exports = router
