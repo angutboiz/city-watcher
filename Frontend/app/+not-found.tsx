@@ -9,9 +9,11 @@ const NotFoundScreen = () => {
         <>
             <Stack.Screen options={{ title: 'Oops!' }} />
             <ThemedView style={styles.container}>
-                <ThemedText type="title">This screen doesn't exist.</ThemedText>
+                <ThemedText type="title" style={{ color: '#006ffd' }}>
+                    Trang này không tồn tại.
+                </ThemedText>
                 <Link href="/(tabs)/home" style={styles.link}>
-                    <ThemedText type="link">Go to home screen!</ThemedText>
+                    <ThemedText type="link">Về trang chủ!</ThemedText>
                 </Link>
             </ThemedView>
         </>

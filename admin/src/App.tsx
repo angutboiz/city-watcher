@@ -16,45 +16,47 @@ import Buttons from "./pages/UiElements/Buttons";
 import Images from "./pages/UiElements/Images";
 import Videos from "./pages/UiElements/Videos";
 import UserProfiles from "./pages/UserProfiles";
+import Account from "./pages/Account";
 
 export default function App() {
-  return (
-    <>
-      <Router>
-        <Routes>
-          {/* Dashboard Layout */}
-          <Route element={<AppLayout />}>
-            <Route index path="/" element={<Ecommerce />} />
-            {/* Others Page */}
-            <Route path="/profile" element={<UserProfiles />} />
-            <Route path="/calendar" element={<Calendar />} />
-            <Route path="/blank" element={<Blank />} />
+    return (
+        <>
+            <Router>
+                <Routes>
+                    {/* Dashboard Layout */}
+                    <Route element={<AppLayout />}>
+                        <Route index path="/" element={<Ecommerce />} />
+                        {/* Others Page */}
+                        <Route path="/profile" element={<UserProfiles />} />
+                        <Route path="/account" element={<Account />} />
+                        <Route path="/calendar" element={<Calendar />} />
+                        <Route path="/blank" element={<Blank />} />
 
-            {/* Forms */}
-            <Route path="/form-elements" element={<FormElements />} />
+                        {/* Forms */}
+                        <Route path="/form-elements" element={<FormElements />} />
 
-            {/* Tables */}
-            <Route path="/basic-tables" element={<BasicTables />} />
+                        {/* Tables */}
+                        <Route path="/basic-tables" element={<BasicTables />} />
 
-            {/* Ui Elements */}
-            <Route path="/alerts" element={<Alerts />} />
-            <Route path="/avatars" element={<Avatars />} />
-            <Route path="/badges" element={<Badges />} />
-            <Route path="/buttons" element={<Buttons />} />
-            <Route path="/images" element={<Images />} />
-            <Route path="/videos" element={<Videos />} />
-          </Route>
+                        {/* Ui Elements */}
+                        <Route path="/alerts" element={<Alerts />} />
+                        <Route path="/avatars" element={<Avatars />} />
+                        <Route path="/badges" element={<Badges />} />
+                        <Route path="/buttons" element={<Buttons />} />
+                        <Route path="/images" element={<Images />} />
+                        <Route path="/videos" element={<Videos />} />
+                    </Route>
 
-          {/* Auth Layout */}
-          <Route element={<AuthLayout />}>
-            <Route path="/signin" element={<SignIn />} />
-            <Route path="/signup" element={<SignUp />} />
-          </Route>
+                    {/* Auth Layout */}
+                    <Route element={<AuthLayout />}>
+                        <Route path="/signin" element={<SignIn />} />
+                        <Route path="/signup" element={<SignUp />} />
+                    </Route>
 
-          {/* Fallback Route */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Router>
-    </>
-  );
+                    {/* Fallback Route */}
+                    <Route path="*" element={<NotFound />} />
+                </Routes>
+            </Router>
+        </>
+    );
 }

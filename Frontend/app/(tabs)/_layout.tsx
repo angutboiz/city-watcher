@@ -29,6 +29,15 @@ export default function TabLayout() {
                     fontSize: 12,
                     marginTop: 4,
                 },
+
+                tabBarStyle: {
+                    elevation: 10, // Loại bỏ shadow trên Android
+                    shadowOpacity: 10, // Loại bỏ shadow trên iOS
+                    shadowColor: 'rgba(0, 0, 0, 0.9)', // Màu shadow
+                    shadowRadius: 10,
+                    borderTopWidth: 0, // Bỏ viền trên tab bar
+                    backgroundColor: 'white', // Màu nền (có thể thay đổi)
+                },
             }}
         >
             <Tabs.Screen

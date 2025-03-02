@@ -1,160 +1,110 @@
-import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity } from 'react-native'
-import React from 'react'
+import {
+    View,
+    ScrollView,
+    Image,
+    ToastAndroid,
+    RefreshControl,
+    TextInput,
+} from 'react-native'
+import React, { useRef } from 'react'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import { Button, Searchbar } from 'react-native-paper'
+import { Ionicons } from '@expo/vector-icons'
+import Status from '@/components/ui/Status'
+import { useRouter } from 'expo-router'
+import axiosAPI from '@/services/axiosInstance'
 
 const HomeScreen = () => {
+    const router = useRouter()
+    const handleChangeTab = () => {
+        router.push('/home/incident-sent')
+    }
+    const [searchQuery, setSearchQuery] = React.useState('')
+    const [refreshing, setRefreshing] = React.useState(false)
+    const onRefresh = React.useCallback(async () => {
+        setRefreshing(true)
+        try {
+            // Thực hiện các tác vụ refresh ở đây
+            const response = await axiosAPI.get('/incident')
+            if (response.data.ok) {
+                // dispatch(setUser(response.data.user))
+                ToastAndroid.show('Làm mới thành công', ToastAndroid.SHORT)
+            }
+        } catch (error) {
+            console.error('Refresh error:', error)
+            ToastAndroid.show('Làm mới thất bại', ToastAndroid.SHORT)
+        } finally {
+            setRefreshing(false)
+        }
+    }, [])
     return (
-        <ScrollView style={styles.container}>
-            {/* Notifications Section */}
-            <View style={styles.sectionHeader}>
-                <Image 
-                    source={require('../assets/images/image4.png')}
-                    style={styles.sectionIcon}
-                />
-                <Text style={styles.sectionTitle}>Đáng chú ý</Text>
-            </View>
-            <ScrollView horizontal style={styles.cardContainer}>
-                <TouchableOpacity style={styles.card}>
-                    <Image 
-                        source={require('../assets/images/image1.png')} 
-                        style={styles.cardImage}
+        <SafeAreaView className="">
+            <ScrollView
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                        colors={['#007AFF']} // Màu của loading spinner
+                        progressBackgroundColor="#ffffff"
                     />
-                    <Text style={styles.cardTitle}>Tiêu đề mẫu tin</Text>
-                    <Text style={styles.cardSubtitle}>Ngày viết</Text>
-                </TouchableOpacity>
-                {/* Additional cards can be added here */}
-            </ScrollView>
-
-            {/* Reports Section */}
-            <View style={styles.sectionHeader}>
-                <Image 
-                    source={require('../assets/images/image5.png')}
-                    style={styles.sectionIcon}
-                />
-                <Text style={styles.sectionTitle}>Báo cáo trước đó</Text>
-            </View>
-            <View style={styles.emptyStateContainer}>
-                <Image 
-                    source={require('../assets/images/image2.png')} 
-                    style={styles.emptyStateImage}
-                />
-                <Text style={styles.emptyStateText}>
-                    Bạn chưa gửi báo cáo nào,{'\n'}
-                    hãy gửi báo cáo và giữ an toàn bạn nhé
-                </Text>
-            </View>
-
-            {/* Pending Messages Section */}
-            <View style={styles.sectionHeader}>
-                <Image 
-                    source={require('../assets/images/image6.png')}
-                    style={styles.sectionIcon}
-                />
-                <Text style={styles.sectionTitle}>Tin nhắn đang chờ</Text>
-            </View>
-            <View style={styles.messageList}>
-                {/* Message Item */}
-                <TouchableOpacity style={styles.messageItem}>
-                    <Image 
-                        source={require('../assets/images/image3.png')} 
-                        style={styles.messageAvatar}
-                    />
-                    <View style={styles.messageContent}>
-                        <Text style={styles.messageName}>Haley James</Text>
-                        <Text style={styles.messageText}>Stand up for what you believe in</Text>
+                }
+            >
+                <View className="px-5 py-5 flex-row gap-5 w-full items-center">
+                    <View className="">
+                        <Image
+                            style={{ width: 35, height: 35 }}
+                            resizeMode="contain"
+                            source={require('@/app/assets/images/ct-watcher-logo.png')}
+                        ></Image>
                     </View>
-                    <View style={styles.messageIndicator} />
-                </TouchableOpacity>
-            </View>
-        </ScrollView>
+                    <View className="flex-1 flex-row items-center gap-2 w-full border border-gray-300 rounded-full px-5">
+                        <Ionicons name="search" size={18} color="#6b7280" />
+                        <TextInput
+                            placeholder="Tìm kiếm mọi thứ..."
+                            className=""
+                        ></TextInput>
+                    </View>
+                </View>
+                <View>
+                    <View className="items-center justify-center gap-5 flex-row px-5">
+                        <Button
+                            mode="contained"
+                            className="!bg-blue-600 flex-1"
+                            style={{ borderRadius: 10, paddingVertical: 3 }}
+                            icon={() => (
+                                <Ionicons
+                                    name="newspaper-outline"
+                                    size={18}
+                                    color="#fff"
+                                />
+                            )}
+                        >
+                            Bản tin
+                        </Button>
+                        <Button
+                            mode="contained"
+                            textColor="#006ffd"
+                            className="!bg-transparent !border !border-blue-600 flex-1"
+                            style={{ borderRadius: 10, paddingVertical: 2 }}
+                            onPress={handleChangeTab}
+                            icon={() => (
+                                <Ionicons
+                                    name="nuclear"
+                                    size={18}
+                                    color="#006ffd"
+                                />
+                            )}
+                        >
+                            Sự cố đã gửi
+                        </Button>
+                    </View>
+                </View>
+                <View className="mt-2">
+                    <Status />
+                </View>
+            </ScrollView>
+        </SafeAreaView>
     )
 }
 
 export default HomeScreen
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#fff',
-        padding: 16,
-    },
-    sectionHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginVertical: 12,
-    },
-    sectionIcon: {
-        width: 24,
-        height: 24,
-        marginRight: 8,
-    },
-    sectionTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-    },
-    cardContainer: {
-        flexDirection: 'row',
-        marginBottom: 20,
-    },
-    card: {
-        width: 150,
-        marginRight: 12,
-    },
-    cardImage: {
-        width: '100%',
-        height: 100,
-        borderRadius: 8,
-    },
-    cardTitle: {
-        fontSize: 14,
-        fontWeight: '500',
-        marginTop: 4,
-    },
-    cardSubtitle: {
-        fontSize: 12,
-        color: '#666',
-    },
-    emptyStateContainer: {
-        alignItems: 'center',
-        padding: 20,
-    },
-    emptyStateImage: {
-        width: 200,
-        height: 200,
-        marginBottom: 12,
-    },
-    emptyStateText: {
-        textAlign: 'center',
-        color: '#666',
-        lineHeight: 20,
-    },
-    messageList: {
-        marginTop: 8,
-    },
-    messageItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        padding: 12,
-    },
-    messageAvatar: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-    },
-    messageContent: {
-        flex: 1,
-        marginLeft: 12,
-    },
-    messageName: {
-        fontSize: 16,
-        fontWeight: '500',
-    },
-    messageText: {
-        color: '#666',
-    },
-    messageIndicator: {
-        width: 8,
-        height: 8,
-        borderRadius: 4,
-        backgroundColor: '#007AFF',
-    },
-})

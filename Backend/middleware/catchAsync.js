@@ -5,7 +5,7 @@ const { logError } = require('../core/logger')
 const catchAsync = (fn) => {
     return (req, res, next) => {
         fn(req, res, next).catch((err) => {
-            logError(err, req)
+            // logError(err, req)
             next(err)
         })
     }

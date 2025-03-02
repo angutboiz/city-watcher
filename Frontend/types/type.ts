@@ -14,3 +14,12 @@ export interface IUser {
     createdAt?: string
     updatedAt?: string
 }
+
+export interface IFormInputIncident {
+    title: string
+    reciver_id: string
+    category_id: string
+    desc: string
+    image: string[]
+    location: string
+}

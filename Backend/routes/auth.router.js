@@ -139,7 +139,7 @@ router.post('/logout', verifyToken, logoutUser)
  *       500:
  *         description: Lỗi server
  */
-router.post('/refresh-token', verifyToken, refreshToken)
+router.post('/refresh-token', refreshToken)
 
 /**
  * @swagger
@@ -170,6 +170,6 @@ router.post('/refresh-token', verifyToken, refreshToken)
  *         description: Lỗi server
  */
 router.post('/change-password', verifyToken, changePassword)
-
 router.post('/check-otp', verifyToken, checkOTP)
+
 module.exports = router

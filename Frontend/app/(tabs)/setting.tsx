@@ -6,8 +6,10 @@ import {
     Image,
     Pressable,
     Modal,
+    RefreshControl,
     ToastAndroid,
     TouchableOpacity,
+    ScrollView,
 } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
@@ -48,7 +50,7 @@ const SettingScreen = () => {
     const ref = useSheetRef<'snap-me'>()
     const [loading, setLoading] = useState(false)
     const [images, setImages] = useState<string>(user?.profilePicture || '')
-
+    const [refreshing, setRefreshing] = useState(false)
     const {
         control,
         handleSubmit,
@@ -154,167 +156,198 @@ const SettingScreen = () => {
             )
         }
     }
-
+    const onRefresh = React.useCallback(async () => {
+        setRefreshing(true)
+        try {
+            // Thực hiện các tác vụ refresh ở đây
+            const { data } = await axiosAPI.get('/profile')
+            if (data.ok) {
+                dispatch(setUser(data.data))
+                ToastAndroid.show('Làm mới thành công', ToastAndroid.SHORT)
+            }
+        } catch (error) {
+            console.error('Refresh error:', error)
+            ToastAndroid.show('Làm mới thất bại', ToastAndroid.SHORT)
+        } finally {
+            setRefreshing(false)
+        }
+    }, [])
+    console.log(user)
     return (
         <SafeAreaView style={styles.container}>
-            <Text style={styles.headerTitle}>Cài đặt</Text>
-
-            {/* Profile Section */}
-            <View style={styles.profileSection}>
-                <TouchableOpacity
-                    style={styles.avatarContainer}
-                    onPress={handleOpenEditProfile}
-                >
-                    <Image
-                        source={{ uri: user?.profilePicture }}
-                        style={styles.avatar}
+            <ScrollView
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                        colors={['#007AFF']} // Màu của loading spinner
+                        progressBackgroundColor="#ffffff"
                     />
-                    <View style={styles.editIconContainer}>
-                        <Ionicons name="pencil" size={12} color="#fff" />
-                    </View>
-                </TouchableOpacity>
-                <Text style={styles.name}>
-                    {user?.displayName || 'Chưa có tên'}
-                </Text>
-                <Text style={styles.username}>{user?.email}</Text>
-            </View>
-
-            {/* Settings List */}
-            <View style={styles.settingsList}>
-                <SettingItem
-                    title="Giao diện"
-                    onPress={() => handleChange('gui')}
-                />
-                <SettingItem
-                    title="Ngôn ngữ"
-                    onPress={() => handleChange('language')}
-                />
-                <SettingItem
-                    title="Thay đổi mật khẩu"
-                    onPress={() => handleChange('change-password')}
-                />
-                <SettingItem
-                    title="Quyền riêng tư và bảo mật"
-                    onPress={() => handleChange('privacy')}
-                />
-                <SettingItem
-                    title="Đăng xuất"
-                    textColor="#FF3B30"
-                    onPress={() => setShowLogoutModal(true)}
-                />
-            </View>
-
-            {/* Logout Modal */}
-            <Modal
-                animationType="fade"
-                transparent={true}
-                visible={showLogoutModal}
-                onRequestClose={() => setShowLogoutModal(false)}
+                }
             >
-                <View style={styles.modalOverlay}>
-                    <View style={styles.modalContent}>
-                        <Text style={styles.modalTitle}>Đăng xuất</Text>
-                        <Text style={styles.modalMessage}>
-                            Bạn có chắc chắn muốn đăng xuất không?{'\n'}
-                            Bạn cần phải đăng nhập lại để sử dụng ứng dụng.
-                        </Text>
-                        <View style={styles.modalButtons}>
-                            <Pressable
-                                style={[
-                                    styles.modalButton,
-                                    styles.cancelButton,
-                                ]}
-                                onPress={() => setShowLogoutModal(false)}
-                            >
-                                <Text style={styles.cancelButtonText}>Hủy</Text>
-                            </Pressable>
-                            <Pressable
-                                style={[
-                                    styles.modalButton,
-                                    styles.logoutButton,
-                                ]}
-                                onPress={handleLogout}
-                            >
-                                <Text style={styles.logoutButtonText}>
-                                    Đăng xuất
-                                </Text>
-                            </Pressable>
-                        </View>
-                    </View>
-                </View>
-            </Modal>
-            <KeyboardAwareScrollView>
-                <ActionSheet>
-                    <View className="h-[500px] px-3 py-5 gap-5">
-                        <Text className="text-xl font-bold">
-                            Thay đổi thông tin người dùng
-                        </Text>
-                        <View className="items-center ">
-                            <Pressable
-                                className="relative w-[80px] h-[80px]"
-                                onPress={pickImage}
-                            >
-                                <Image
-                                    source={{ uri: images }}
-                                    style={{
-                                        width: 80,
-                                        height: 80,
-                                        borderRadius: 50,
-                                    }}
-                                ></Image>
+                <Text style={styles.headerTitle}>Cài đặt</Text>
 
-                                <View className="absolute w-8 h-8 rounded-full items-center justify-center bg-gray-200 -bottom-1 right-1">
-                                    <Ionicons
-                                        name="camera"
-                                        size={16}
-                                        color="black"
-                                    />
-                                </View>
-                            </Pressable>
+                {/* Profile Section */}
+                <View style={styles.profileSection}>
+                    <TouchableOpacity
+                        style={styles.avatarContainer}
+                        onPress={handleOpenEditProfile}
+                    >
+                        <Image
+                            source={{ uri: user?.profilePicture }}
+                            style={styles.avatar}
+                        />
+                        <View style={styles.editIconContainer}>
+                            <Ionicons name="pencil" size={12} color="#fff" />
                         </View>
-                        <View className="gap-3">
-                            <Controller
-                                control={control}
-                                name="displayName"
-                                rules={{
-                                    required: 'Tên người dùng là bắt buộc',
-                                    minLength: {
-                                        value: 4,
-                                        message:
-                                            'Tên người dùng tối thiểu 4 ký tự',
-                                    },
-                                }}
-                                render={({ field: { onChange, value } }) => (
-                                    <TextInput
-                                        label="Tên người dùng"
-                                        mode="outlined"
-                                        autoFocus
-                                        value={value}
-                                        onChangeText={onChange}
-                                        error={!!errors.displayName}
-                                        activeOutlineColor="#006ffd"
-                                    />
-                                )}
-                            />
-                            {errors.displayName && (
-                                <Text style={{ color: '#ff0000' }}>
-                                    {errors.displayName.message}
-                                </Text>
-                            )}
+                    </TouchableOpacity>
+                    <Text style={styles.name}>
+                        {user?.displayName || 'Chưa có tên'}
+                    </Text>
+                    <Text style={styles.username}>{user?.email}</Text>
+                </View>
+
+                {/* Settings List */}
+                <View style={styles.settingsList}>
+                    <SettingItem
+                        title="Giao diện"
+                        onPress={() => handleChange('gui')}
+                    />
+                    <SettingItem
+                        title="Ngôn ngữ"
+                        onPress={() => handleChange('language')}
+                    />
+                    <SettingItem
+                        title="Thay đổi mật khẩu"
+                        onPress={() => handleChange('change-password')}
+                    />
+                    <SettingItem
+                        title="Quyền riêng tư và bảo mật"
+                        onPress={() => handleChange('privacy')}
+                    />
+                    <SettingItem
+                        title="Đăng xuất"
+                        textColor="#FF3B30"
+                        onPress={() => setShowLogoutModal(true)}
+                    />
+                </View>
+
+                {/* Logout Modal */}
+                <Modal
+                    animationType="fade"
+                    transparent={true}
+                    visible={showLogoutModal}
+                    onRequestClose={() => setShowLogoutModal(false)}
+                >
+                    <View style={styles.modalOverlay}>
+                        <View style={styles.modalContent}>
+                            <Text style={styles.modalTitle}>Đăng xuất</Text>
+                            <Text style={styles.modalMessage}>
+                                Bạn có chắc chắn muốn đăng xuất không?{'\n'}
+                                Bạn cần phải đăng nhập lại để sử dụng ứng dụng.
+                            </Text>
+                            <View style={styles.modalButtons}>
+                                <Pressable
+                                    style={[
+                                        styles.modalButton,
+                                        styles.cancelButton,
+                                    ]}
+                                    onPress={() => setShowLogoutModal(false)}
+                                >
+                                    <Text style={styles.cancelButtonText}>
+                                        Hủy
+                                    </Text>
+                                </Pressable>
+                                <Pressable
+                                    style={[
+                                        styles.modalButton,
+                                        styles.logoutButton,
+                                    ]}
+                                    onPress={handleLogout}
+                                >
+                                    <Text style={styles.logoutButtonText}>
+                                        Đăng xuất
+                                    </Text>
+                                </Pressable>
+                            </View>
                         </View>
-                        <Button
-                            mode="contained"
-                            className=" !rounded-lg "
-                            style={{ backgroundColor: '#007AFF' }}
-                            onPress={handleSubmit(onSubmit)}
-                            loading={loading}
-                            disabled={loading}
-                        >
-                            Cập nhật thông tin
-                        </Button>
                     </View>
-                </ActionSheet>
-            </KeyboardAwareScrollView>
+                </Modal>
+                <KeyboardAwareScrollView>
+                    <ActionSheet>
+                        <View className="h-[500px] px-3 py-5 gap-5">
+                            <Text className="text-xl font-bold">
+                                Thay đổi thông tin người dùng
+                            </Text>
+                            <View className="items-center ">
+                                <Pressable
+                                    className="relative w-[80px] h-[80px]"
+                                    onPress={pickImage}
+                                >
+                                    <Image
+                                        source={{ uri: images }}
+                                        style={{
+                                            width: 80,
+                                            height: 80,
+                                            borderRadius: 50,
+                                        }}
+                                    ></Image>
+
+                                    <View className="absolute w-8 h-8 rounded-full items-center justify-center bg-gray-200 -bottom-1 right-1">
+                                        <Ionicons
+                                            name="camera"
+                                            size={16}
+                                            color="black"
+                                        />
+                                    </View>
+                                </Pressable>
+                            </View>
+                            <View className="gap-3">
+                                <Controller
+                                    control={control}
+                                    name="displayName"
+                                    rules={{
+                                        required: 'Tên người dùng là bắt buộc',
+                                        minLength: {
+                                            value: 4,
+                                            message:
+                                                'Tên người dùng tối thiểu 4 ký tự',
+                                        },
+                                    }}
+                                    render={({
+                                        field: { onChange, value },
+                                    }) => (
+                                        <TextInput
+                                            label="Tên người dùng"
+                                            mode="outlined"
+                                            autoFocus
+                                            value={value}
+                                            onChangeText={onChange}
+                                            error={!!errors.displayName}
+                                            activeOutlineColor="#006ffd"
+                                        />
+                                    )}
+                                />
+                                {errors.displayName && (
+                                    <Text style={{ color: '#ff0000' }}>
+                                        {errors.displayName.message}
+                                    </Text>
+                                )}
+                            </View>
+                            <Button
+                                mode="contained"
+                                className=" !rounded-lg "
+                                style={{ backgroundColor: '#007AFF' }}
+                                onPress={handleSubmit(onSubmit)}
+                                loading={loading}
+                                disabled={loading}
+                            >
+                                Cập nhật thông tin
+                            </Button>
+                        </View>
+                    </ActionSheet>
+                </KeyboardAwareScrollView>
+            </ScrollView>
         </SafeAreaView>
     )
 }

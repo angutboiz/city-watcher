@@ -6,6 +6,7 @@ const incidentModel = require('../models/incidents.model')
 // Tạo sự cố mới
 const createIncident = catchAsync(async (req, res) => {
     const { title, desc, category_id, location, reciver_id } = req.body
+    console.log(req.body)
     if (!title || !desc || !category_id || !location || !reciver_id) {
         return ErrorResponse.badRequest(res, 'Vui lòng điền đầy đủ thông tin!')
     }

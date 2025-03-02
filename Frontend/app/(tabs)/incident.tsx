@@ -3,20 +3,43 @@ import {
     Text,
     StyleSheet,
     SafeAreaView,
-    TextInput,
     Pressable,
     ScrollView,
     Image,
     Modal,
+    ToastAndroid,
 } from 'react-native'
 import React, { useState } from 'react'
 import { Ionicons, MaterialIcons } from '@expo/vector-icons'
 import * as ImagePicker from 'expo-image-picker'
 import * as Location from 'expo-location'
 import MapView, { Marker } from 'react-native-maps'
+import { Controller, useForm } from 'react-hook-form'
+import { Button, TextInput } from 'react-native-paper'
+import axiosAPI from '@/services/axiosInstance'
+import { IFormInputIncident } from '@/types/type'
+import { useRouter } from 'expo-router'
+import { Dropdown } from 'react-native-element-dropdown'
 
 const IncidentScreen = () => {
+    const {
+        control,
+        setValue,
+        handleSubmit,
+        formState: { errors },
+        watch,
+    } = useForm<IFormInputIncident>({
+        defaultValues: {
+            title: '',
+            reciver_id: '',
+            category_id: '',
+            desc: '',
+            image: [],
+            location: '',
+        },
+    })
     const [isPublic, setIsPublic] = useState(false)
+    const [loading, setLoading] = useState(false)
     const [images, setImages] = useState<string[]>([])
     const [showManagerPicker, setShowManagerPicker] = useState(false)
     const [selectedManager, setSelectedManager] = useState<string | null>(null)
@@ -27,13 +50,29 @@ const IncidentScreen = () => {
     const [showMap, setShowMap] = useState(false)
     const [isPinning, setIsPinning] = useState(false)
     const [showProblemTypePicker, setShowProblemTypePicker] = useState(false)
-    const [selectedProblemType, setSelectedProblemType] = useState<string | null>(null)
+    const [selectedProblemType, setSelectedProblemType] = useState<
+        string | null
+    >(null)
+
+    const router = useRouter()
 
     const managers = [
-        'Bùi Xuân Quang - QLKV Dĩ An',
-        'Nguyễn Văn A - QLKV Thủ Đức',
-        'Trần Thị B - QLKV Bình Thạnh',
-        'Lê Văn C - QLKV Quận 9',
+        {
+            label: 'Bùi Xuân Quang - QLKV Dĩ An',
+            value: 'Bùi Xuân Quang - QLKV Dĩ An',
+        },
+        {
+            label: 'Nguyễn Văn A - QLKV Thủ Đức',
+            value: 'Nguyễn Văn A - QLKV Thủ Đức',
+        },
+        {
+            label: 'Trần Thị B - QLKV Bình Thạnh',
+            value: 'Trần Thị B - QLKV Bình Thạnh',
+        },
+        {
+            label: 'Lê Văn C - QLKV Quận 9',
+            value: 'Lê Văn C - QLKV Quận 9',
+        },
     ]
 
     const problemTypes = [
@@ -76,7 +115,7 @@ const IncidentScreen = () => {
                 await ImagePicker.requestMediaLibraryPermissionsAsync()
 
             if (status !== 'granted') {
-                alert(  
+                alert(
                     'Xin lỗi, chúng tôi cần quyền truy cập thư viện ảnh để thực hiện chức năng này!'
                 )
                 return
@@ -94,7 +133,9 @@ const IncidentScreen = () => {
                 const newImages = result.assets.map((asset) => asset.uri)
                 setImages((prevImages) => {
                     const combinedImages = [...prevImages, ...newImages]
-                    return combinedImages.slice(0, 4) // Limit to 4 images
+                    const limitedImages = combinedImages.slice(0, 4)
+                    setValue('image', limitedImages) // Cập nhật giá trị trong form
+                    return limitedImages
                 })
             }
         } catch (error) {
@@ -117,11 +158,81 @@ const IncidentScreen = () => {
             const currentLocation = await Location.getCurrentPositionAsync({})
             const { latitude, longitude } = currentLocation.coords
             setLocation({ latitude, longitude })
+            handleLocationSelect(currentLocation.coords)
             setShowMap(true)
         } catch (error) {
             console.error('Error getting location:', error)
             alert('Không thể lấy vị trí hiện tại. Vui lòng thử lại.')
         }
+    }
+
+    // Cập nhật hàm submit
+    const onSubmit = async (data: IFormInputIncident) => {
+        console.log('click')
+        console.log(data)
+        try {
+            setLoading(true)
+
+            // Kiểm tra dữ liệu trước khi gửi
+            // if (!data.title || !data.reciver_id || !data.category_id || !data.desc || !data.location || data.image.length === 0) {
+            //     ToastAndroid.show('Vui lòng điền đầy đủ thông tin', ToastAndroid.SHORT);
+            //     return;
+            // }
+
+            const formData = new FormData()
+            formData.append('title', data.title)
+            formData.append('reciver_id', data.reciver_id)
+            formData.append('category_id', data.category_id)
+            formData.append('desc', data.desc)
+            formData.append('location', data.location)
+
+            // Append images
+            data.image.forEach((uri, index) => {
+                formData.append('image', {
+                    uri,
+                    type: 'image/jpeg',
+                    name: `image${index}.jpg`,
+                })
+            })
+
+            console.log('Form data:', formData)
+
+            const response = await axiosAPI.post('/incident/create', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            })
+
+            if (response.data.ok) {
+                ToastAndroid.show('Gửi báo cáo thành công', ToastAndroid.SHORT)
+                // Reset form hoặc chuyển hướng
+                // router.back();
+            }
+        } catch (error) {
+            console.error('Submit error:', error)
+            ToastAndroid.show('Gửi báo cáo thất bại', ToastAndroid.SHORT)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    // Cập nhật hàm xử lý khi chọn loại sự cố
+    const handleSelectProblemType = (type: any) => {
+        setSelectedProblemType(type.title)
+        setValue('category_id', type.id)
+        setShowProblemTypePicker(false)
+    }
+
+    // Cập nhật hàm xử lý khi chọn location
+    const handleLocationSelect = (coordinates: {
+        latitude: number
+        longitude: number
+    }) => {
+        // Cập nhật vị trí hiện tại
+        setLocation(coordinates)
+        // Cập nhật giá trị form với string coordinates
+        setValue('location', `${coordinates.latitude},${coordinates.longitude}`)
+        setShowMap(false)
     }
 
     return (
@@ -136,53 +247,115 @@ const IncidentScreen = () => {
 
             <ScrollView style={styles.form}>
                 {/* Manager Selection */}
-                <View style={styles.formGroup}>
-                    <Text style={styles.label}>Chọn người quản lý khu vực</Text>
-                    <Pressable
-                        style={styles.select}
-                        onPress={() => setShowManagerPicker(true)}
-                    >
-                        <Text style={styles.selectText}>
-                            {selectedManager || 'Chọn người quản lý'}
+                <View>
+                    <Controller
+                        control={control}
+                        name="reciver_id"
+                        rules={{ required: 'Vui lòng chọn người quản lý' }}
+                        render={({ field: { onChange, value } }) => (
+                            <Dropdown
+                                style={styles.dropdown}
+                                placeholderStyle={styles.placeholderStyle}
+                                selectedTextStyle={styles.selectedTextStyle}
+                                inputSearchStyle={styles.inputSearchStyle}
+                                iconStyle={styles.iconStyle}
+                                data={managers}
+                                search
+                                maxHeight={300}
+                                labelField="label"
+                                valueField="value"
+                                placeholder="Chọn người gửi"
+                                searchPlaceholder="Tìm thông tin người quản lí khu vực..."
+                                value={value}
+                                onChange={onChange}
+                            />
+                        )}
+                    ></Controller>
+                    {errors.reciver_id && (
+                        <Text className="text-red-500">
+                            {errors.reciver_id.message}
                         </Text>
-                        <Ionicons name="chevron-down" size={20} color="#000" />
-                    </Pressable>
+                    )}
                 </View>
-
                 {/* Title Input */}
                 <View style={styles.formGroup}>
-                    <Text style={styles.label}>Tiêu đề</Text>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Nhập tiêu đề của sự cố"
-                        placeholderTextColor="#999"
-                    />
+                    <Controller
+                        control={control}
+                        name="title"
+                        rules={{ required: 'Vui lòng nhập tiêu đề' }}
+                        render={({ field: { onChange, value } }) => (
+                            <TextInput
+                                label="Tiêu đề"
+                                mode="outlined"
+                                value={value}
+                                onChangeText={onChange}
+                                error={!!errors.title}
+                                activeOutlineColor="#006ffd"
+                                autoCapitalize="none"
+                            />
+                        )}
+                    ></Controller>
+                    {errors.title && (
+                        <Text className="text-red-500">
+                            {errors.title.message}
+                        </Text>
+                    )}
                 </View>
 
                 {/* Problem Type Input */}
                 <View style={styles.formGroup}>
                     <Text style={styles.label}>Chọn thể loại sự cố</Text>
-                    <Pressable
-                        style={styles.select}
-                        onPress={() => setShowProblemTypePicker(true)}
-                    >
-                        <Text style={styles.selectText}>
-                            {selectedProblemType || 'Vui lòng chọn thể loại sự cố'}
+                    <Controller
+                        control={control}
+                        name="reciver_id"
+                        rules={{ required: 'Vui lòng nhập tiêu đề' }}
+                        render={({ field: { onChange, value } }) => (
+                            <Pressable
+                                style={styles.select}
+                                onPress={() => setShowProblemTypePicker(true)}
+                            >
+                                <Text style={styles.selectText}>
+                                    {selectedProblemType ||
+                                        'Vui lòng chọn thể loại sự cố'}
+                                </Text>
+                                <Ionicons
+                                    name="chevron-down"
+                                    size={20}
+                                    color="#000"
+                                />
+                            </Pressable>
+                        )}
+                    ></Controller>
+                    {errors.reciver_id && (
+                        <Text className="text-red-500">
+                            {errors.reciver_id.message}
                         </Text>
-                        <Ionicons name="chevron-down" size={20} color="#000" />
-                    </Pressable>
+                    )}
                 </View>
 
                 {/* Description Input */}
                 <View style={styles.formGroup}>
-                    <Text style={styles.label}>Mô tả chi tiết</Text>
-                    <TextInput
-                        style={[styles.input, styles.textArea]}
-                        placeholder="Mô tả chi tiết về sự cố đó..."
-                        placeholderTextColor="#999"
-                        multiline
-                        numberOfLines={4}
-                    />
+                    <Controller
+                        control={control}
+                        name="desc"
+                        rules={{ required: 'Vui lòng nhập mô tả sự cố' }}
+                        render={({ field: { onChange, value } }) => (
+                            <TextInput
+                                label="Mô tả về sự cố"
+                                value={value}
+                                activeOutlineColor="#006ffd"
+                                mode="outlined"
+                                onChangeText={onChange}
+                                multiline
+                                numberOfLines={4}
+                            />
+                        )}
+                    ></Controller>
+                    {errors.desc && (
+                        <Text className="text-red-500">
+                            {errors.desc.message}
+                        </Text>
+                    )}
                 </View>
 
                 {/* Map Section */}
@@ -190,31 +363,48 @@ const IncidentScreen = () => {
                     <View style={styles.map}>
                         {location && (
                             <MapView
-                                style={styles.mapView}
+                                style={styles.fullMapView}
                                 initialRegion={{
-                                    latitude: location.latitude,
-                                    longitude: location.longitude,
-                                    latitudeDelta: 0.005,
-                                    longitudeDelta: 0.005,
+                                    latitude: location?.latitude || 0,
+                                    longitude: location?.longitude || 0,
+                                    latitudeDelta: 0.01,
+                                    longitudeDelta: 0.01,
                                 }}
                             >
-                                <Marker
-                                    coordinate={{
-                                        latitude: location.latitude,
-                                        longitude: location.longitude,
-                                    }}
-                                />
+                                {location && (
+                                    <Marker
+                                        coordinate={location}
+                                        draggable
+                                        onDragEnd={(e) =>
+                                            handleLocationSelect(
+                                                e.nativeEvent.coordinate
+                                            )
+                                        }
+                                    />
+                                )}
                             </MapView>
                         )}
                     </View>
-                    <Pressable
-                        style={styles.locationButton}
-                        onPress={getCurrentLocation}
-                    >
-                        <Text style={styles.locationButtonText}>
-                            Chọn vị trí hiện tại
+                    <Controller
+                        control={control}
+                        name="location"
+                        rules={{ required: 'Bạn chưa chọn vị trí' }}
+                        render={({ field: { onChange, value } }) => (
+                            <Pressable
+                                style={styles.locationButton}
+                                onPress={getCurrentLocation}
+                            >
+                                <Text style={styles.locationButtonText}>
+                                    Chọn vị trí hiện tại
+                                </Text>
+                            </Pressable>
+                        )}
+                    ></Controller>
+                    {errors.location && (
+                        <Text className="text-red-500">
+                            {errors.location.message}
                         </Text>
-                    </Pressable>
+                    )}
                 </View>
 
                 {/* Image Upload Section */}
@@ -257,15 +447,35 @@ const IncidentScreen = () => {
                             />
                         ))}
                     </View>
-                    <Pressable style={styles.uploadButton} onPress={pickImage}>
-                        <Ionicons
-                            name="cloud-upload-outline"
-                            size={20}
-                            color="#fff"
-                            style={styles.uploadIcon}
-                        />
-                        <Text style={styles.uploadButtonText}>Tải ảnh</Text>
-                    </Pressable>
+                    <Controller
+                        control={control}
+                        name="image"
+                        rules={{
+                            required:
+                                'Vui lòng tải ảnh lên để xác thực tính đúng đắn của sự cố',
+                        }}
+                        render={({ field: { onChange, value } }) => (
+                            <Pressable
+                                style={styles.uploadButton}
+                                onPress={pickImage}
+                            >
+                                <Ionicons
+                                    name="cloud-upload-outline"
+                                    size={20}
+                                    color="#fff"
+                                    style={styles.uploadIcon}
+                                />
+                                <Text style={styles.uploadButtonText}>
+                                    Tải ảnh
+                                </Text>
+                            </Pressable>
+                        )}
+                    ></Controller>
+                    {errors.reciver_id && (
+                        <Text className="text-red-500">
+                            {errors.reciver_id.message}
+                        </Text>
+                    )}
                 </View>
 
                 {/* Public Toggle */}
@@ -291,56 +501,26 @@ const IncidentScreen = () => {
                     </Pressable>
                 </View>
             </ScrollView>
-
-            {/* Manager Selection Modal */}
-            <Modal
-                visible={showManagerPicker}
-                transparent={true}
-                animationType="slide"
-            >
-                <View style={styles.modalOverlay}>
-                    <View style={styles.modalContent}>
-                        <View style={styles.modalHeader}>
-                            <Text style={styles.modalTitle}>
-                                Chọn người quản lý
-                            </Text>
-                            <Pressable
-                                onPress={() => setShowManagerPicker(false)}
-                                style={styles.closeButton}
-                            >
-                                <Ionicons name="close" size={24} color="#000" />
-                            </Pressable>
-                        </View>
-                        {managers.map((manager, index) => (
-                            <Pressable
-                                key={index}
-                                style={styles.managerOption}
-                                onPress={() => {
-                                    setSelectedManager(manager)
-                                    setShowManagerPicker(false)
-                                }}
-                            >
-                                <Text
-                                    style={[
-                                        styles.managerOptionText,
-                                        selectedManager === manager &&
-                                            styles.selectedManagerText,
-                                    ]}
-                                >
-                                    {manager}
-                                </Text>
-                                {selectedManager === manager && (
-                                    <Ionicons
-                                        name="checkmark"
-                                        size={24}
-                                        color="#007AFF"
-                                    />
-                                )}
-                            </Pressable>
-                        ))}
-                    </View>
-                </View>
-            </Modal>
+            <View className="px-5 py-5">
+                <Button
+                    mode="contained"
+                    style={{ borderRadius: 10, paddingVertical: 3 }}
+                    buttonColor="#006ffd"
+                    onPress={handleSubmit(onSubmit)}
+                    loading={loading}
+                    disabled={loading}
+                    icon={() => (
+                        <Ionicons
+                            name="send"
+                            size={20}
+                            color="#fff"
+                            style={styles.uploadIcon}
+                        />
+                    )}
+                >
+                    Gửi sự cố
+                </Button>
+            </View>
 
             {/* Location Map Modal */}
             <Modal
@@ -430,7 +610,6 @@ const IncidentScreen = () => {
             >
                 <SafeAreaView style={styles.modalContainer}>
                     <View style={styles.modalHeader}>
-                        <Text style={styles.modalTitle}>Chọn thể loại sự cố</Text>
                         <Pressable
                             onPress={() => setShowProblemTypePicker(false)}
                             style={styles.closeButton}
@@ -438,7 +617,7 @@ const IncidentScreen = () => {
                             <Ionicons name="close" size={24} color="#000" />
                         </Pressable>
                     </View>
-                    
+
                     <ScrollView style={styles.problemTypeContainer}>
                         <View style={styles.problemTypeGrid}>
                             {problemTypes.map((type) => (
@@ -446,17 +625,22 @@ const IncidentScreen = () => {
                                     key={type.id}
                                     style={[
                                         styles.problemTypeItem,
-                                        selectedProblemType === type.title && styles.selectedProblemType
+                                        selectedProblemType === type.title &&
+                                            styles.selectedProblemType,
                                     ]}
-                                    onPress={() => setSelectedProblemType(type.title)}
+                                    onPress={() =>
+                                        handleSelectProblemType(type)
+                                    }
                                 >
                                     <View style={styles.problemTypeIcon}>
-                                        <Image 
+                                        <Image
                                             source={type.icon}
                                             style={styles.problemTypeIconImage}
                                         />
                                     </View>
-                                    <Text style={styles.problemTypeText}>{type.title}</Text>
+                                    <Text style={styles.problemTypeText}>
+                                        {type.title}
+                                    </Text>
                                 </Pressable>
                             ))}
                         </View>
@@ -485,7 +669,7 @@ const styles = StyleSheet.create({
     },
     header: {
         paddingHorizontal: 16,
-        paddingTop: 60,
+        paddingTop: 40,
     },
     headerTitle: {
         fontSize: 20,
@@ -782,8 +966,32 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: '600',
     },
+
+    dropdown: {
+        margin: 0,
+        padding: 15,
+        borderRadius: 5,
+        height: 50,
+        borderColor: 'gray',
+        borderWidth: 1,
+    },
+
+    placeholderStyle: {
+        fontSize: 16,
+    },
+    selectedTextStyle: {
+        fontSize: 16,
+    },
+
+    inputSearchStyle: {
+        height: 40,
+        fontSize: 16,
+    },
+    iconStyle: {
+        width: 20,
+        height: 20,
+    },
 })
 function alert(arg0: string) {
     throw new Error('Function not implemented.')
 }
-

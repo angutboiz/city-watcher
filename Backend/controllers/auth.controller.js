@@ -82,7 +82,6 @@ const registerUser = catchAsync(async (req, res) => {
 
 const loginUser = catchAsync(async (req, res) => {
     const { email, password } = req.body
-    console.log(req.body)
     if (!email && !password) {
         return ErrorResponse.badRequest(res, 'Vui lòng điền đẩy đủ')
     }
@@ -94,7 +93,9 @@ const loginUser = catchAsync(async (req, res) => {
     }
 
     if (!user.status) {
-        return ErrorResponse.badRequest(res, 'Tài khoản chưa xác thực OTP')
+        return ErrorResponse.badRequest(res, 'Tài khoản chưa xác thực OTP', {
+            redirect: '/otp',
+        })
     }
     //Nhớ mở lại
     // if (!user.verify) {
@@ -125,11 +126,13 @@ const loginUser = catchAsync(async (req, res) => {
         httpOnly: true,
         secure: true,
         sameSite: 'strict',
+        maxAge: 1000 * 60 * 60, // 60 phút
     })
     res.cookie('refreshToken', refreshToken, {
         httpOnly: true,
         secure: true,
         sameSite: 'strict',
+        maxAge: 1000 * 60 * 60 * 24 * 7, // 7 ngày
     })
 
     return SuccessResponse.ok(res, 'Đăng nhập thành công', {
@@ -142,7 +145,6 @@ const loginUser = catchAsync(async (req, res) => {
 // Refresh Token để cấp lại Access Token mới
 const refreshToken = catchAsync(async (req, res) => {
     const { refreshToken } = req.body
-    console.log('refreshToken:::', refreshToken)
     if (!refreshToken)
         return ErrorResponse.unauthorized(res, 'Không có Refresh Token')
 
@@ -193,7 +195,6 @@ const logoutUser = catchAsync(async (req, res) => {
 
 const forgetUser = catchAsync(async (req, res) => {
     const { email } = req.body
-    console.log(email)
     if (!email) {
         return ErrorResponse.badRequest(res, 'Vui lòng điền email của bạn')
     }
@@ -291,7 +292,7 @@ const checkOTP = catchAsync(async (req, res) => {
     if (!otp) {
         return ErrorResponse.badRequest(res, 'Vui lòng điền mã OTP')
     }
-    const findUser = await User.findById(id).lean()
+    const findUser = await User.findById(id)
 
     if (!findUser) {
         return ErrorResponse.badRequest(res, 'Email không tồn tại')

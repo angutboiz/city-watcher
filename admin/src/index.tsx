@@ -9,18 +9,17 @@ import reportWebVitals from "./reportWebVitals";
 import App from "./App";
 import { ThemeProvider } from "./context/ThemeContext";
 import { AppWrapper } from "./components/common/PageMeta";
+import { UserProvider } from "./context/userContext";
 
-const root = ReactDOM.createRoot(
-  document.getElementById("root") as HTMLElement
-);
+const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
 root.render(
-  <React.StrictMode>
     <AppWrapper>
-      <ThemeProvider>
-        <App />
-      </ThemeProvider>
+        <ThemeProvider>
+            <UserProvider>
+                <App />
+            </UserProvider>
+        </ThemeProvider>
     </AppWrapper>
-  </React.StrictMode>
 );
 
 // If you want to start measuring performance in your app, pass a function

@@ -1,10 +1,9 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios'
 import { getTokens, saveTokens, removeTokens } from './tokenStorage'
-import Toast from 'react-native-toast-message'
 import { ToastAndroid } from 'react-native'
 const axiosAPI = axios.create({
     // baseURL: 'http://10.0.2.2:5000/api/v1',
-    baseURL: 'http://192.168.33.73:5000/api/v1',
+    baseURL: 'https://city-watcher.vercel.app/api/v1',
 })
 
 let isRefreshing = false
@@ -71,7 +70,7 @@ axiosAPI.interceptors.response.use(
             try {
                 const tokens = await getTokens()
                 const { data } = await axios.post(
-                    'http://192.168.1.5:5000/api/v1/auth/refresh-token',
+                    'https://city-watcher.vercel.app/api/v1/auth/refresh-token',
                     { refreshToken: tokens?.refreshToken }
                 )
 

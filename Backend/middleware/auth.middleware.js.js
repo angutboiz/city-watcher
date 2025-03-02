@@ -5,7 +5,6 @@ const ErrorResponse = require('../core/error.response')
 // kiểm tra token và lấy thông tin user từ token
 const verifyToken = async (req, res, next) => {
     const accessToken = req.headers.authorization?.split(' ')[1]
-    console.log(accessToken)
     if (!accessToken)
         return ErrorResponse.unauthorized(
             res,
@@ -17,7 +16,7 @@ const verifyToken = async (req, res, next) => {
 
         const currentTime = Math.floor(Date.now() / 1000)
         if (decoded.exp < currentTime) {
-            return ErrorResponse.unauthorized(res, 'Access Token đã hết hạn')
+            return ErrorResponse.badRequest(res, 'Access Token đã hết hạn')
         }
 
         const verified = jwt.verify(
@@ -36,7 +35,7 @@ const verifyToken = async (req, res, next) => {
 }
 
 const checkAdmin = (req, res, next) => {
-    if (req.user.role === 'admin') {
+    if (req.user.role === 'admin' || req.user.role === 'manager') {
         next()
     } else {
         ErrorResponse.forbidden(res, 'Bạn không có quyền truy cập')

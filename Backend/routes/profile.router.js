@@ -4,7 +4,6 @@ const {
     getProfile,
     findProfileByManager,
     updateProfile,
-    updateRole,
 } = require('../controllers/profile.controller')
 const { checkAdmin, verifyToken } = require('../middleware/auth.middleware.js')
 const router = express.Router()
@@ -115,6 +114,5 @@ router.patch('/', verifyToken, updateProfile)
  *       200:
  *         description: Vai trò người dùng đã được cập nhật
  */
-router.patch('/role', verifyToken, checkAdmin, updateRole)
 
 module.exports = router

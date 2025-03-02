@@ -45,9 +45,8 @@ const findProfileByManager = catchAsync(async (req, res) => {
 })
 
 const updateProfile = catchAsync(async (req, res) => {
-    const { status, profilePicture, verify, displayName, role } = req.body
-    console.log(displayName)
-    const { id } = req.user
+    const { id, status, profilePicture, verify, displayName, roles, zone } =
+        req.body
     const updateFields = {} // Tạo đối tượng rỗng để chứa các trường cần cập nhật
 
     const user = await User.findById(id)
@@ -60,8 +59,9 @@ const updateProfile = catchAsync(async (req, res) => {
     if (profilePicture !== undefined)
         updateFields.profilePicture = profilePicture
     if (verify !== undefined) updateFields.verify = verify
-    if (role !== undefined) updateFields.role = role
+    if (roles !== undefined) updateFields.roles = roles
     if (status !== undefined) updateFields.status = status
+    if (zone !== undefined) updateFields.zone = zone
 
     const update_profile = await User.findByIdAndUpdate(
         id,
@@ -74,27 +74,11 @@ const updateProfile = catchAsync(async (req, res) => {
             'Cập nhật thông tin không thành công'
         )
     }
-    return SuccessResponse.ok(res, 'Cập nhật thành công', { update_profile })
-})
-const updateRole = catchAsync(async (req, res) => {
-    const { id, roles } = req.body
-    if (!id || !roles)
-        return ErrorResponse.notFound(res, 'Vui lòng điền đủ thông tin!')
-    console.log(roles)
-    const updateRole = await User.findByIdAndUpdate(
-        id,
-        { $set: { roles: roles } },
-        { new: true }
-    )
-    if (!updateRole) {
-        return ErrorResponse.badRequest(res, 'Cập nhật quyền không thành công')
-    }
-    return SuccessResponse.ok(res, 'Cập nhật quyền thành công', updateRole)
+    return SuccessResponse.ok(res, 'Cập nhật thành công', update_profile)
 })
 module.exports = {
     getAllProfile,
     getProfile,
     findProfileByManager,
     updateProfile,
-    updateRole,
 }
