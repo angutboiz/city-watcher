@@ -13,7 +13,6 @@ const categoryRoutes = require('./category.router')
 const incidentRoutes = require('./incident.router')
 const { checkAdmin, verifyToken } = require('../middleware/auth.middleware.js')
 const swaggerOptions = require('../config/swagger.config')
-
 const swaggerDocs = swaggerJsdoc(swaggerOptions)
 // Cấu hình options cho swagger-ui-express
 const swaggerUiOptions = {
